@@ -54,7 +54,7 @@ std::vector<std::pair<int,int>> Board::getValidWhitePawnMoves(int row, int col) 
     if (row == 6  && board(row - 1, col) == empty && board(row - 2, col) == empty) {
         validMoves.push_back(std::make_pair(row - 2, col));
     }
-    if (board(row - 1, col) == empty){
+    if (row > 0 && board(row - 1, col) == empty){
         validMoves.push_back(std::make_pair(row - 1, col));
     }
 
@@ -67,7 +67,7 @@ std::vector<std::pair<int,int>> Board::getValidBlackPawnMoves(int row, int col) 
     if (row == 1  && board(row + 1, col) == empty && board(row + 2, col) == empty) {
         validMoves.push_back(std::make_pair(row + 2, col));
     }
-    if (board(row + 1, col) == empty){
+    if (row < 7 && board(row + 1, col) == empty){
         validMoves.push_back(std::make_pair(row + 1, col));
     }
     
@@ -75,21 +75,142 @@ std::vector<std::pair<int,int>> Board::getValidBlackPawnMoves(int row, int col) 
 }
 
 std::vector<std::pair<int,int>> Board::getValidRookMoves(int row, int col) {
-    return {};
+    std::vector<std::pair<int,int>> validMoves;
+
+    for (int i = row - 1; i >= 0; i--) {
+        if (board(i, col) == empty) {
+            validMoves.push_back(std::make_pair(i, col));
+        } else {
+            break;
+        }
+    }
+    for (int i = row + 1; i < 8; i++) {
+        if (board(i, col) == empty) {
+            validMoves.push_back(std::make_pair(i, col));
+        } else {
+            break;
+        }
+    }
+    for (int i = col - 1; i >= 0; i--) {
+        if (board(row, i) == empty) {
+            validMoves.push_back(std::make_pair(row, i));
+        } else {
+            break;
+        }
+    }
+    for (int i = col + 1; i < 8; i++) {
+        if (board(row, i) == empty) {
+            validMoves.push_back(std::make_pair(row, i));
+        } else {
+            break;
+        }
+    }
+
+    return validMoves;
 }
 
 std::vector<std::pair<int,int>> Board::getValidKnightMoves(int row, int col) {
-    return {};
+    std::vector<std::pair<int,int>> validMoves;
+
+    if(row-2 >= 0 && col-1 >= 0 && board(row-2, col-1) == empty) {
+        validMoves.push_back(std::make_pair(row-2, col-1));
+    }
+    if(row-2 >= 0 && col+1 < 8 && board(row-2, col+1) == empty) {
+        validMoves.push_back(std::make_pair(row-2, col+1));
+    }
+    if(row-1 >= 0 && col-2 >= 0 && board(row-1, col-2) == empty) {
+        validMoves.push_back(std::make_pair(row-1, col-2));
+    }
+    if(row-1 >= 0 && col+2 < 8 && board(row-1, col+2) == empty) {
+        validMoves.push_back(std::make_pair(row-1, col+2));
+    }
+    if(row+1 < 8 && col-2 >= 0 && board(row+1, col-2) == empty) {
+        validMoves.push_back(std::make_pair(row+1, col-2));
+    }
+    if(row+1 < 8 && col+2 < 8 && board(row+1, col+2) == empty) {
+        validMoves.push_back(std::make_pair(row+1, col+2));
+    }
+    if(row+2 < 8 && col-1 >= 0 && board(row+2, col-1) == empty) {
+        validMoves.push_back(std::make_pair(row+2, col-1));
+    }
+    if(row+2 < 8 && col+1 < 8 && board(row+2, col+1) == empty) {
+        validMoves.push_back(std::make_pair(row+2, col+1));
+    }
+
+    return validMoves;
 }
 
 std::vector<std::pair<int,int>> Board::getValidBishopMoves(int row, int col) {
-    return {};
+    std::vector<std::pair<int,int>> validMoves;
+
+    for (int i = 1; row - i >= 0 && col - i >= 0; i++) {
+        if (board(row - i, col - i) == empty) {
+            validMoves.push_back(std::make_pair(row - i, col - i));
+        } else {
+            break;
+        }
+    }
+    for (int i = 1; row - i >= 0 && col + i < 8; i++) {
+        if (board(row - i, col + i) == empty) {
+            validMoves.push_back(std::make_pair(row - i, col + i));
+        } else {
+            break;
+        }
+    }
+    for (int i = 1; row + i < 8 && col - i >= 0; i++) {
+        if (board(row + i, col - i) == empty) {
+            validMoves.push_back(std::make_pair(row + i, col - i));
+        } else {
+            break;
+        }
+    }
+    for (int i = 1; row + i < 8 && col + i < 8; i++) {
+        if (board(row + i, col + i) == empty) {
+            validMoves.push_back(std::make_pair(row + i, col + i));
+        } else {
+            break;
+        }
+    }
+    
+    return validMoves;
 }
 
 std::vector<std::pair<int,int>> Board::getValidQueenMoves(int row, int col) {
-    return {};
+    std::vector<std::pair<int,int>> validMoves;
+    std::vector<std::pair<int,int>> rookMoves = getValidRookMoves(row, col);
+    std::vector<std::pair<int,int>> bishopMoves = getValidBishopMoves(row, col);
+    validMoves.insert(validMoves.end(), rookMoves.begin(), rookMoves.end());
+    validMoves.insert(validMoves.end(), bishopMoves.begin(), bishopMoves.end());
+    return validMoves;
 }
 
 std::vector<std::pair<int,int>> Board::getValidKingMoves(int row, int col) {
-    return {};
+    std::vector<std::pair<int,int>> validMoves;
+
+    if(row-1 >= 0 && col-1 >= 0 && board(row-1, col-1) == empty) {
+        validMoves.push_back(std::make_pair(row-1, col-1));
+    }
+    if(row-1 >= 0 && board(row-1, col) == empty) {
+        validMoves.push_back(std::make_pair(row-1, col));
+    }
+    if(row-1 >= 0 && col+1 < 8 && board(row-1, col+1) == empty) {
+        validMoves.push_back(std::make_pair(row-1, col+1));
+    }
+    if(col-1 >= 0 && board(row, col-1) == empty) {
+        validMoves.push_back(std::make_pair(row, col-1));
+    }
+    if(col+1 < 8 && board(row, col+1) == empty) {
+        validMoves.push_back(std::make_pair(row, col+1));
+    }
+    if(row+1 < 8 && col-1 >= 0 && board(row+1, col-1) == empty) {
+        validMoves.push_back(std::make_pair(row+1, col-1));
+    }
+    if(row+1 < 8 && board(row+1, col) == empty) {
+        validMoves.push_back(std::make_pair(row+1, col));
+    }
+    if(row+1 < 8 && col+1 < 8 && board(row+1, col+1) == empty) {
+        validMoves.push_back(std::make_pair(row+1, col+1));
+    }
+
+    return validMoves;
 }
