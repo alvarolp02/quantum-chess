@@ -20,19 +20,26 @@ class Board {
     public:
         Board();
 
-        // void initialize();
-        // bool movePiece(int startX, int startY, int endX, int endY);
+        void movePiece(int row0, int col0, int row1, int col1);
         std::vector<std::pair<int,int>> getValidMoves(int row, int col);
+        void printBoard();
+        bool isWhite(int row, int col);
+        bool isBlack(int row, int col);
 
     private:
         Eigen::Matrix<int, 8, 8> board;
         std::vector<std::pair<int,int>> getValidWhitePawnMoves(int row, int col);
+        std::vector<std::pair<int,int>> getValidWhiteRookMoves(int row, int col);
+        std::vector<std::pair<int,int>> getValidWhiteKnightMoves(int row, int col);
+        std::vector<std::pair<int,int>> getValidWhiteBishopMoves(int row, int col);
+        std::vector<std::pair<int,int>> getValidWhiteQueenMoves(int row, int col);
+        std::vector<std::pair<int,int>> getValidWhiteKingMoves(int row, int col);
         std::vector<std::pair<int,int>> getValidBlackPawnMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidRookMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidKnightMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidBishopMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidQueenMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidKingMoves(int row, int col);
+        std::vector<std::pair<int,int>> getValidBlackRookMoves(int row, int col);
+        std::vector<std::pair<int,int>> getValidBlackKnightMoves(int row, int col);
+        std::vector<std::pair<int,int>> getValidBlackBishopMoves(int row, int col);
+        std::vector<std::pair<int,int>> getValidBlackQueenMoves(int row, int col);
+        std::vector<std::pair<int,int>> getValidBlackKingMoves(int row, int col);
 
 
         // void setupPieces();
