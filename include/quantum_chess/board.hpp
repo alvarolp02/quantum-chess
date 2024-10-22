@@ -26,8 +26,10 @@ class Board {
         bool isWhite(int row, int col);
         bool isBlack(int row, int col);
 
-    private:
+
         Eigen::Matrix<int, 8, 8> board;
+
+    private:
         std::vector<std::pair<int,int>> getValidWhitePawnMoves(int row, int col);
         std::vector<std::pair<int,int>> getValidWhiteRookMoves(int row, int col);
         std::vector<std::pair<int,int>> getValidWhiteKnightMoves(int row, int col);

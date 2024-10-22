@@ -1,5 +1,6 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <Eigen/Dense>
 
 
 class Interface {
@@ -7,7 +8,7 @@ class Interface {
         Interface();
         void openWindow();
         void loadBoard();
-        void loadPieces();
+        void loadPieces(Eigen::Matrix<int, 8, 8>);
         void loadMovements();
 
         sf::RenderWindow window;

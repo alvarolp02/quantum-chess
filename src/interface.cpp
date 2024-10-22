@@ -30,7 +30,7 @@ void Interface::openWindow() {
 void Interface::loadBoard(){
     // Definir colores
     sf::Color white(255, 255, 255);
-    sf::Color black(0, 0, 0);
+    sf::Color black(100, 100, 100);
 
     // Crear el tablero
     sf::RectangleShape tile(sf::Vector2f(TILE_SIZE, TILE_SIZE));
@@ -47,19 +47,68 @@ void Interface::loadBoard(){
     // window.display();
 }
 
-void Interface::loadPieces(){
-    sf::Texture tileTexture;
-    if (!tileTexture.loadFromFile("../assets/white-pawn.png")) {
-        std::cerr << "Error al cargar la imagen." << std::endl;
-        return;
-    } 
-    sf::Sprite tileSprite(tileTexture);
-    tileSprite.setScale(
-                    float(TILE_SIZE) / tileTexture.getSize().x, 
-                    float(TILE_SIZE) / tileTexture.getSize().y
-                );
-    tileSprite.setPosition(0,TILE_SIZE);
-    window.draw(tileSprite);
+void Interface::loadPieces(Eigen::Matrix<int, 8, 8> board){
+
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        for (int j = 0; j < BOARD_SIZE; ++j) {
+            if (board(i, j) == 0) {
+                continue;
+            }
+            sf::Texture tileTexture;
+
+            std::string path = "../assets/";
+            switch (board(i, j)) {
+                case 1:
+                    path += "white-pawn.png";
+                    break;
+                case 2:
+                    path += "white-rook.png";
+                    break;
+                case 3:
+                    path += "white-knight.png";
+                    break;
+                case 4:
+                    path += "white-bishop.png";
+                    break;
+                case 5:
+                    path += "white-queen.png";
+                    break;
+                case 6:
+                    path += "white-king.png";
+                    break;
+                case 7:
+                    path += "black-pawn.png";
+                    break;
+                case 8:
+                    path += "black-rook.png";
+                    break;
+                case 9:
+                    path += "black-knight.png";
+                    break;
+                case 10:
+                    path += "black-bishop.png";
+                    break;
+                case 11:
+                    path += "black-queen.png";
+                    break;
+                case 12:
+                    path += "black-king.png";
+                    break;
+            }
+
+            if (!tileTexture.loadFromFile(path)) {
+                std::cerr << "Error al cargar la imagen." << std::endl;
+                return;
+            } 
+            sf::Sprite tileSprite(tileTexture);
+            tileSprite.setScale(
+                            float(TILE_SIZE) / tileTexture.getSize().x, 
+                            float(TILE_SIZE) / tileTexture.getSize().y
+                        );
+            tileSprite.setPosition(j * TILE_SIZE, i * TILE_SIZE);
+            window.draw(tileSprite);
+        }
+    }
 
 }
 

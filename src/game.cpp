@@ -15,7 +15,7 @@ int main(int argc, char * argv[])
 
   while(true){
       interface.loadBoard();
-      interface.loadPieces();
+      interface.loadPieces(B.board);
       // interface.loadMovements();
       interface.window.display();
 
