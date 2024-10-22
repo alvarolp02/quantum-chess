@@ -1,7 +1,7 @@
 #include <iostream>
 #include <Eigen/Dense>
 
-#define empty 0
+#define gap 0
 #define w_pawn 1
 #define w_rook 2
 #define w_knight 3

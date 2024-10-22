@@ -1,13 +1,24 @@
 #include "board.cpp"
+#include "interface.cpp"
+#include <thread>
 
 
 int main(int argc, char * argv[])
 {
   Board B = Board();
 
+  Interface interface = Interface();
+  std::thread thread_0(&Interface::openWindow, &interface); 
   std::string turn = "white";
 
+ 
+
   while(true){
+      interface.loadBoard();
+      interface.loadPieces();
+      // interface.loadMovements();
+      interface.window.display();
+
       int input1;
       int input2;
       std::cin >> input1;  
@@ -37,6 +48,8 @@ int main(int argc, char * argv[])
 
       turn = turn == "white" ? "black" : "white"; 
   }
+  
+  thread_0.join();
 
   return 0;
 }
