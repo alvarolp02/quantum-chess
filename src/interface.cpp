@@ -2,7 +2,6 @@
 #include <thread>
 
 Interface::Interface() {
-    // Crear la ventana
     window.create(sf::VideoMode(TILE_SIZE * BOARD_SIZE, TILE_SIZE * BOARD_SIZE), "Tablero de Ajedrez");
     
 }
@@ -15,16 +14,16 @@ void Interface::openWindow() {
 std::pair<int,int> Interface::waitForInput(){
     sf::Event event;
     while (window.waitEvent(event)) {
-        // Cerrar la ventana
+        // Close window
         if (event.type == sf::Event::Closed)
             window.close();
 
-        // Detectar clic del mouse
+        // Detect mouse click
         if (event.type == sf::Event::MouseButtonPressed) {
             if (event.mouseButton.button == sf::Mouse::Left) {
-                int x = event.mouseButton.y / TILE_SIZE; // Columna
-                int y = event.mouseButton.x / TILE_SIZE; // Fila
-                std::cout << "Clic en la casilla: (" << x << ", " << y << ")" << std::endl;
+                int x = event.mouseButton.y / TILE_SIZE; // Rows
+                int y = event.mouseButton.x / TILE_SIZE; // Columns
+
                 return std::make_pair(x, y);
             }
         }
@@ -32,23 +31,19 @@ std::pair<int,int> Interface::waitForInput(){
 }
 
 void Interface::loadBoard(){
-    // Definir colores
     sf::Color white(255, 255, 255);
     sf::Color black(100, 100, 100);
 
-    // Crear el tablero
     sf::RectangleShape tile(sf::Vector2f(TILE_SIZE, TILE_SIZE));
 
-    // // Dibujar el tablero
     window.clear();
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
             tile.setPosition(j * TILE_SIZE, i * TILE_SIZE);
-            tile.setFillColor((i + j) % 2 == 0 ? white : black); // Alternar colores
+            tile.setFillColor((i + j) % 2 == 0 ? white : black); // Alternate colors
             window.draw(tile);
         }
     }
-    // window.display();
 }
 
 void Interface::loadPieces(Eigen::Matrix<int, 8, 8> board){
@@ -101,7 +96,7 @@ void Interface::loadPieces(Eigen::Matrix<int, 8, 8> board){
             }
 
             if (!tileTexture.loadFromFile(path)) {
-                std::cerr << "Error al cargar la imagen." << std::endl;
+                std::cerr << "Error loading images." << std::endl;
                 return;
             } 
             sf::Sprite tileSprite(tileTexture);
@@ -126,6 +121,4 @@ void Interface::loadMovements(std::vector<std::pair<int,int>> movements){
         tile.setFillColor(green);
         window.draw(tile);
     }
-
-    std::cout << "Displaying movements" << std::endl;
 }

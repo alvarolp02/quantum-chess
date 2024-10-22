@@ -11,7 +11,6 @@ Board::Board() {
             gap,gap,gap,gap,gap,gap,gap,gap,
             w_pawn,w_pawn,w_pawn,w_pawn,w_pawn,w_pawn,w_pawn,w_pawn,
             w_rook,w_knight,w_bishop,w_queen,w_king,w_bishop,w_knight,w_rook;
-    std::cout << board << std::endl;
 }
 
 void Board::movePiece(int row0, int col0, int row1, int col1) {
@@ -330,8 +329,8 @@ std::vector<std::pair<int,int>> Board::getValidBlackRookMoves(int row, int col) 
     for (int i = col - 1; i >= 0; i--) {
         if (board(row, i) == gap) {
             validMoves.push_back(std::make_pair(row, i));
-        } else if(board(i, col) < 7) {
-            validMoves.push_back(std::make_pair(i, col));
+        } else if(board(row, i) < 7) {
+            validMoves.push_back(std::make_pair(row, i));
             break;
         } else {
             break;
@@ -340,8 +339,8 @@ std::vector<std::pair<int,int>> Board::getValidBlackRookMoves(int row, int col) 
     for (int i = col + 1; i < 8; i++) {
         if (board(row, i) == gap) {
             validMoves.push_back(std::make_pair(row, i));
-        } else if(board(i, col) < 7) {
-            validMoves.push_back(std::make_pair(i, col));
+        } else if(board(row, i) < 7) {
+            validMoves.push_back(std::make_pair(row, i));
             break;
         } else {
             break;
