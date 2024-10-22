@@ -9,7 +9,8 @@ class Interface {
         void openWindow();
         void loadBoard();
         void loadPieces(Eigen::Matrix<int, 8, 8>);
-        void loadMovements();
+        void loadMovements(std::vector<std::pair<int,int>>);
+        std::pair<int,int> waitForInput();
 
         sf::RenderWindow window;
 
