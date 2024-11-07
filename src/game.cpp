@@ -73,7 +73,7 @@ int main(int argc, char * argv[])
         if (target1_ok && target2_ok && !(target1==target2)) {
           B.movePiece(selectedPiece, target1);
 
-          tree.propagate(selectedPiece, target1);
+          tree.split(selectedPiece, target1, target2);
           tree.print_tree();
           interface.loadBoard();
           interface.loadPieces(B.board_matrix);
