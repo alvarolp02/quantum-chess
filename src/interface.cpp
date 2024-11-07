@@ -11,7 +11,7 @@ void Interface::openWindow() {
     }
 }
 
-std::pair<int,int> Interface::waitForInput(){
+Tile Interface::waitForInput(){
     sf::Event event;
     while (window.waitEvent(event)) {
         // Close window
@@ -24,7 +24,7 @@ std::pair<int,int> Interface::waitForInput(){
                 int x = event.mouseButton.y / TILE_SIZE; // Rows
                 int y = event.mouseButton.x / TILE_SIZE; // Columns
 
-                return std::make_pair(x, y);
+                return Tile(x, y);
             }
         }
     }
@@ -111,13 +111,13 @@ void Interface::loadPieces(Eigen::Matrix<int, 8, 8> board){
 
 }
 
-void Interface::loadMovements(std::vector<std::pair<int,int>> movements){
+void Interface::loadMovements(std::vector<Tile> movements){
     sf::Color green(0, 255, 0);
 
     sf::RectangleShape tile(sf::Vector2f(TILE_SIZE, TILE_SIZE));
 
     for (int i = 0; i < movements.size(); i++) {
-        tile.setPosition(movements[i].second * TILE_SIZE, movements[i].first * TILE_SIZE);
+        tile.setPosition(movements[i].col * TILE_SIZE, movements[i].row * TILE_SIZE);
         tile.setOutlineColor(green);
         tile.setOutlineThickness(5);
         tile.setFillColor(sf::Color::Transparent);

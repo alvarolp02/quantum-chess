@@ -13,41 +13,38 @@ int main(int argc, char * argv[])
 
  
   interface.loadBoard();
-  interface.loadPieces(B.board);
+  interface.loadPieces(B.board_matrix);
   interface.window.display();
 
-  std::vector<std::pair<int,int>> movements;
-  std::pair<int,int> selectedPiece;
+  std::vector<Tile> movements;
+  Tile selectedPiece;
 
   while(true){
 
-      std::pair<int,int> input = interface.waitForInput();
-
-      int row = input.first;
-      int col = input.second;
+      Tile input = interface.waitForInput();
 
       for (int i = 0; i < movements.size(); i++) {
-        if (movements[i].first == row && movements[i].second == col) {
-          B.movePiece(selectedPiece.first, selectedPiece.second, row, col);
+        if (movements[i]==input) {
+          B.movePiece(selectedPiece, input);
           interface.loadBoard();
-          interface.loadPieces(B.board);
+          interface.loadPieces(B.board_matrix);
           interface.window.display();
           turn = turn == "white" ? "black" : "white"; 
           movements.clear();
-          std::pair<int,int> selectedPiece;
+          Tile selectedPiece;
           break;
         }
       }
 
-      if (turn == "white" && B.isWhite(row, col) == false) {
+      if (turn == "white" && B.isWhite(input) == false) {
         continue;
-      } else if (turn == "black" && B.isBlack(row, col) == false) {
+      } else if (turn == "black" && B.isBlack(input) == false) {
         continue;
       }
 
-      movements = B.getValidMoves(row, col);
+      movements = B.getValidMoves(input);
       interface.loadBoard();
-      interface.loadPieces(B.board);
+      interface.loadPieces(B.board_matrix);
       interface.loadMovements(movements);
       interface.window.display();
 
