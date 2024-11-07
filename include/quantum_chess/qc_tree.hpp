@@ -6,7 +6,7 @@
 
 class QCTree {
     public:
-        QCTree(Board B);
+        QCTree();
 
         void propagate(Tile source, Tile target);
 
@@ -16,8 +16,8 @@ class QCTree {
 
         void get_ponderated_board();
 
-        Eigen::Matrix<double, 8, 8> pond_board;
-        Eigen::Matrix<int, 8, 8> q_board;
+        Eigen::Matrix<double, 8, 8> pond_matrix;
+        Board q_board;
 
     private: 
         void print_tree_aux(QCNode* node, std::string prefix, bool split);

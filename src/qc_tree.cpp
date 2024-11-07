@@ -1,7 +1,8 @@
 #include "quantum_chess/qc_tree.hpp"
 
-QCTree::QCTree(Board B){
-    this->root = new QCNode(B,0);
+QCTree::QCTree(){
+    Board q_board = Board();
+    this->root = new QCNode(Board(),0);
 }
 
 void QCTree::propagate(Tile source, Tile target){
@@ -63,8 +64,8 @@ void QCTree::get_ponderated_board(){
     auto boards = get_all_boards();
     int n_boards = boards.size();
 
-    pond_board = Eigen::Matrix<double, 8, 8>::Zero();
-    q_board = Eigen::Matrix<int, 8, 8>::Zero();
+    pond_matrix = Eigen::Matrix<double, 8, 8>::Zero();
+    q_board.board_matrix = Eigen::Matrix<int, 8, 8>::Zero();
 
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < 8; ++j) {
@@ -72,14 +73,14 @@ void QCTree::get_ponderated_board(){
             for (auto board : boards) {
                 if (board(i, j) != 0) {
                     sum+=1;
-                    if(q_board(i, j) == 0){
-                        q_board(i, j) = board(i, j);
-                    } else if (q_board(i, j) != board(i, j)){
+                    if(q_board.board_matrix(i, j) == 0){
+                        q_board.board_matrix(i, j) = board(i, j);
+                    } else if (q_board.board_matrix(i, j) != board(i, j)){
                         std::cout << "Error: Different pieces in the same tile" << std::endl;
                     }
                 }
             }
-            pond_board(i, j) = sum/n_boards;
+            pond_matrix(i, j) = sum/n_boards;
         }
     }
 

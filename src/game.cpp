@@ -1,14 +1,13 @@
 #include "interface.cpp"
-#include "board.cpp"
 #include "qc_tree.cpp"
+#include "board.cpp"
 #include "qc_node.cpp"
 #include <thread>
 
 
 int main(int argc, char * argv[])
 {
-  Board B = Board();
-  QCTree tree = QCTree(B);
+  QCTree tree = QCTree();
 
   Interface interface = Interface();
   std::thread thread_0(&Interface::openWindow, &interface); 
@@ -16,7 +15,7 @@ int main(int argc, char * argv[])
 
  
   interface.loadBoard();
-  interface.loadPieces(B.board_matrix);
+  interface.loadPieces(tree.q_board.board_matrix);
   interface.window.display();
 
   std::vector<Tile> movements;
@@ -34,18 +33,14 @@ int main(int argc, char * argv[])
         bool is_target = std::find(movements.begin(), movements.end(), input) != movements.end();
         if (is_target) {
           Tile target = input;
-          B.movePiece(selectedPiece, target);
 
           tree.propagate(selectedPiece, target);
           tree.print_tree();
           interface.loadBoard();
 
           tree.get_ponderated_board();
-          std::cout << tree.pond_board << std::endl;
-          std::cout << tree.q_board << std::endl;
-
-          interface.loadPieces(tree.q_board);
-          interface.loadPonderation(tree.pond_board);
+          interface.loadPieces(tree.q_board.board_matrix);
+          interface.loadPonderation(tree.pond_matrix);
           interface.window.display();
           turn = turn == "white" ? "black" : "white"; 
           movements.clear();
@@ -55,17 +50,17 @@ int main(int argc, char * argv[])
         } else { // The input is not a move
 
           //Check if the input is a selecting a valid piece
-          if (turn == "white" && B.isWhite(input) == false) {
+          if (turn == "white" && tree.q_board.isWhite(input) == false) {
             continue;
-          } else if (turn == "black" && B.isBlack(input) == false) {
+          } else if (turn == "black" && tree.q_board.isBlack(input) == false) {
             continue;
           }
 
-          movements = B.getValidMoves(input);
           interface.loadBoard();
           tree.get_ponderated_board();
-          interface.loadPieces(tree.q_board);
-          interface.loadPonderation(tree.pond_board);
+          movements = tree.q_board.getValidMoves(input);
+          interface.loadPieces(tree.q_board.board_matrix);
+          interface.loadPonderation(tree.pond_matrix);
           interface.loadMovements(movements);
           interface.window.display();
 
@@ -81,7 +76,6 @@ int main(int argc, char * argv[])
 
         
         if (target1_ok && target2_ok && !(target1==target2)) {
-          B.movePiece(selectedPiece, target1);
 
           tree.split(selectedPiece, target1, target2);
           tree.print_tree();
@@ -89,11 +83,8 @@ int main(int argc, char * argv[])
           interface.loadTree(tree);
 
           tree.get_ponderated_board();
-          std::cout << tree.pond_board << std::endl;
-          std::cout << tree.q_board << std::endl;
-
-          interface.loadPieces(tree.q_board);
-          interface.loadPonderation(tree.pond_board);
+          interface.loadPieces(tree.q_board.board_matrix);
+          interface.loadPonderation(tree.pond_matrix);
           interface.window.display();
           turn = turn == "white" ? "black" : "white"; 
           movements.clear();
