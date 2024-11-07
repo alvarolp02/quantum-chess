@@ -2,8 +2,8 @@
 
 Board::Board() {
     // Initialize the board to be gap
-    board = Eigen::Matrix<int, 8, 8>::Zero();
-    board << b_rook,b_knight,b_bishop,b_queen,b_king,b_bishop,b_knight,b_rook,
+    board_matrix = Eigen::Matrix<int, 8, 8>::Zero();
+    board_matrix << b_rook,b_knight,b_bishop,b_queen,b_king,b_bishop,b_knight,b_rook,
              b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,
             gap,gap,gap,gap,gap,gap,gap,gap,
             gap,gap,gap,gap,gap,gap,gap,gap,
@@ -13,209 +13,209 @@ Board::Board() {
             w_rook,w_knight,w_bishop,w_queen,w_king,w_bishop,w_knight,w_rook;
 }
 
-void Board::movePiece(int row0, int col0, int row1, int col1) {
-    board(row1, col1) = board(row0, col0);
-    board(row0, col0) = gap;
+void Board::movePiece(Tile source, Tile target) {
+    board_matrix(target.row, target.col) = board_matrix(source.row, source.col);
+    board_matrix(source.row, source.col) = gap;
 }
 
 void Board::printBoard() {
-    std::cout << board << std::endl;
+    std::cout << board_matrix << std::endl;
 }
 
-bool Board::isWhite(int row, int col) {
-    return board(row, col) < 7 && board(row, col) != gap;
+bool Board::isWhite(Tile t) {
+    return board_matrix(t.row, t.col) < 7 && board_matrix(t.row, t.col) != gap;
 }
 
-bool Board::isBlack(int row, int col) {
-    return board(row, col) >= 7;
+bool Board::isBlack(Tile t) {
+    return board_matrix(t.row, t.col) >= 7;
 }
 
-std::vector<std::pair<int,int>> Board::getValidMoves(int row, int col) {
-    int piece = board(row, col);
+std::vector<Tile> Board::getValidMoves(Tile t) {
+    int piece = board_matrix(t.row, t.col);
 
     switch (piece){
         case w_pawn:
-            return getValidWhitePawnMoves(row, col);
+            return getValidWhitePawnMoves(t);
         case w_rook:
-            return getValidWhiteRookMoves(row, col);
+            return getValidWhiteRookMoves(t);
         case w_knight:
-            return getValidWhiteKnightMoves(row, col);
+            return getValidWhiteKnightMoves(t);
         case w_bishop:
-            return getValidWhiteBishopMoves(row, col);
+            return getValidWhiteBishopMoves(t);
         case w_queen:   
-            return getValidWhiteQueenMoves(row, col);
+            return getValidWhiteQueenMoves(t);
         case w_king:
-            return getValidWhiteKingMoves(row, col); 
+            return getValidWhiteKingMoves(t); 
         case b_pawn:
-            return getValidBlackPawnMoves(row, col);
+            return getValidBlackPawnMoves(t);
         case b_rook:    
-            return getValidBlackRookMoves(row, col);
+            return getValidBlackRookMoves(t);
         case b_knight:
-            return getValidBlackKnightMoves(row, col);
+            return getValidBlackKnightMoves(t);
         case b_bishop:
-            return getValidBlackBishopMoves(row, col);
+            return getValidBlackBishopMoves(t);
         case b_queen:
-            return getValidBlackQueenMoves(row, col);
+            return getValidBlackQueenMoves(t);
         case b_king:
-            return getValidBlackKingMoves(row, col);
+            return getValidBlackKingMoves(t);
         default:
         std::cout << "Invalid piece" << std::endl;
             return {};
     }
 }
 
-std::vector<std::pair<int,int>> Board::getValidWhitePawnMoves(int row, int col) {
-    std::vector<std::pair<int,int>> validMoves;
+std::vector<Tile> Board::getValidWhitePawnMoves(Tile t) {
+    std::vector<Tile> validMoves;
     //Move
-    if (row == 6  && board(row - 1, col) == gap && board(row - 2, col) == gap) {
-        validMoves.push_back(std::make_pair(row - 2, col));
+    if (t.row == 6  && board_matrix(t.row - 1, t.col) == gap && board_matrix(t.row - 2, t.col) == gap) {
+        validMoves.push_back(Tile(t.row - 2, t.col));
     }
-    if (row > 0 && board(row - 1, col) == gap){
-        validMoves.push_back(std::make_pair(row - 1, col));
+    if (t.row > 0 && board_matrix(t.row - 1, t.col) == gap){
+        validMoves.push_back(Tile(t.row - 1, t.col));
     }
     //Capture
-    if (row > 0 && col > 0 && board(row - 1, col - 1) >= 7) {
-        validMoves.push_back(std::make_pair(row - 1, col - 1));
+    if (t.row > 0 && t.col > 0 && board_matrix(t.row - 1, t.col - 1) >= 7) {
+        validMoves.push_back(Tile(t.row - 1, t.col - 1));
     }
-    if (row > 0 && col < 7 && board(row - 1, col + 1) >= 7) {
-        validMoves.push_back(std::make_pair(row - 1, col + 1));
-    }
-
-    return validMoves;
-}
-
-std::vector<std::pair<int,int>> Board::getValidWhiteRookMoves(int row, int col) {
-    std::vector<std::pair<int,int>> validMoves;
-
-    for (int i = row - 1; i >= 0; i--) {
-        if (board(i, col) == gap) {
-            validMoves.push_back(std::make_pair(i, col));
-        } else if (board(i, col) >= 7) {
-            validMoves.push_back(std::make_pair(i, col));
-            break;
-        } else {
-            break;
-        }
-    }
-    for (int i = row + 1; i < 8; i++) {
-        if (board(i, col) == gap) {
-            validMoves.push_back(std::make_pair(i, col));
-        } else if(board(i, col) >= 7) {
-            validMoves.push_back(std::make_pair(i, col));
-            break;
-        } else {
-            break;
-        }
-    }
-    for (int i = col - 1; i >= 0; i--) {
-        if (board(row, i) == gap) {
-            validMoves.push_back(std::make_pair(row, i));
-        } else if(board(row, i) >= 7) {
-            validMoves.push_back(std::make_pair(i, col));
-            break;
-        } else {
-            break;
-        }
-    }
-    for (int i = col + 1; i < 8; i++) {
-        if (board(row, i) == gap) {
-            validMoves.push_back(std::make_pair(row, i));
-        } else if(board(row, i) >= 7) {
-            validMoves.push_back(std::make_pair(i, col));
-            break;
-        } else {
-            break;
-        }
+    if (t.row > 0 && t.col < 7 && board_matrix(t.row - 1, t.col + 1) >= 7) {
+        validMoves.push_back(Tile(t.row - 1, t.col + 1));
     }
 
     return validMoves;
 }
 
-std::vector<std::pair<int,int>> Board::getValidWhiteKnightMoves(int row, int col) {
-    std::vector<std::pair<int,int>> validMoves;
+std::vector<Tile> Board::getValidWhiteRookMoves(Tile t) {
+    std::vector<Tile> validMoves;
 
-    if(row-2 >= 0 && col-1 >= 0 && board(row-2, col-1) == gap) {
-        validMoves.push_back(std::make_pair(row-2, col-1));
-    } else if (row-2 >= 0 && col-1 >= 0 && board(row-2, col-1) >= 7) {
-        validMoves.push_back(std::make_pair(row-2, col-1));
+    for (int i = t.row - 1; i >= 0; i--) {
+        if (board_matrix(i, t.col) == gap) {
+            validMoves.push_back(Tile(i, t.col));
+        } else if (board_matrix(i, t.col) >= 7) {
+            validMoves.push_back(Tile(i, t.col));
+            break;
+        } else {
+            break;
+        }
     }
-    if(row-2 >= 0 && col+1 < 8 && board(row-2, col+1) == gap) {
-        validMoves.push_back(std::make_pair(row-2, col+1));
-    } else if (row-2 >= 0 && col+1 < 8 && board(row-2, col+1) >= 7) {
-        validMoves.push_back(std::make_pair(row-2, col+1));
+    for (int i = t.row + 1; i < 8; i++) {
+        if (board_matrix(i, t.col) == gap) {
+            validMoves.push_back(Tile(i, t.col));
+        } else if(board_matrix(i, t.col) >= 7) {
+            validMoves.push_back(Tile(i, t.col));
+            break;
+        } else {
+            break;
+        }
     }
-    if(row-1 >= 0 && col-2 >= 0 && board(row-1, col-2) == gap) {
-        validMoves.push_back(std::make_pair(row-1, col-2));
-    } else if (row-1 >= 0 && col-2 >= 0 && board(row-1, col-2) >= 7) {
-        validMoves.push_back(std::make_pair(row-1, col-2));
+    for (int i = t.col - 1; i >= 0; i--) {
+        if (board_matrix(t.row, i) == gap) {
+            validMoves.push_back(Tile(t.row, i));
+        } else if(board_matrix(t.row, i) >= 7) {
+            validMoves.push_back(Tile(i, t.col));
+            break;
+        } else {
+            break;
+        }
     }
-    if(row-1 >= 0 && col+2 < 8 && board(row-1, col+2) == gap) {
-        validMoves.push_back(std::make_pair(row-1, col+2));
-    } else if (row-1 >= 0 && col+2 < 8 && board(row-1, col+2) >= 7) {
-        validMoves.push_back(std::make_pair(row-1, col+2));
-    }
-    if(row+1 < 8 && col-2 >= 0 && board(row+1, col-2) == gap) {
-        validMoves.push_back(std::make_pair(row+1, col-2));
-    } else if (row+1 < 8 && col-2 >= 0 && board(row+1, col-2) >= 7) {
-        validMoves.push_back(std::make_pair(row+1, col-2));
-    }
-    if(row+1 < 8 && col+2 < 8 && board(row+1, col+2) == gap) {
-        validMoves.push_back(std::make_pair(row+1, col+2));
-    } else if (row+1 < 8 && col+2 < 8 && board(row+1, col+2) >= 7) {
-        validMoves.push_back(std::make_pair(row+1, col+2));
-    }
-    if(row+2 < 8 && col-1 >= 0 && board(row+2, col-1) == gap) {
-        validMoves.push_back(std::make_pair(row+2, col-1));
-    } else if (row+2 < 8 && col-1 >= 0 && board(row+2, col-1) >= 7) {
-        validMoves.push_back(std::make_pair(row+2, col-1));
-    }
-    if(row+2 < 8 && col+1 < 8 && board(row+2, col+1) == gap) {
-        validMoves.push_back(std::make_pair(row+2, col+1));
-    } else if (row+2 < 8 && col+1 < 8 && board(row+2, col+1) >= 7) {
-        validMoves.push_back(std::make_pair(row+2, col+1));
+    for (int i = t.col + 1; i < 8; i++) {
+        if (board_matrix(t.row, i) == gap) {
+            validMoves.push_back(Tile(t.row, i));
+        } else if(board_matrix(t.row, i) >= 7) {
+            validMoves.push_back(Tile(i, t.col));
+            break;
+        } else {
+            break;
+        }
     }
 
     return validMoves;
 }
 
-std::vector<std::pair<int,int>> Board::getValidWhiteBishopMoves(int row, int col) {
-    std::vector<std::pair<int,int>> validMoves;
+std::vector<Tile> Board::getValidWhiteKnightMoves(Tile t) {
+    std::vector<Tile> validMoves;
 
-    for (int i = 1; row - i >= 0 && col - i >= 0; i++) {
-        if (board(row - i, col - i) == gap) {
-            validMoves.push_back(std::make_pair(row - i, col - i));
-        } else if (board(row - i, col - i) >= 7) {
-            validMoves.push_back(std::make_pair(row - i, col - i));
+    if(t.row-2 >= 0 && t.col-1 >= 0 && board_matrix(t.row-2, t.col-1) == gap) {
+        validMoves.push_back(Tile(t.row-2, t.col-1));
+    } else if (t.row-2 >= 0 && t.col-1 >= 0 && board_matrix(t.row-2, t.col-1) >= 7) {
+        validMoves.push_back(Tile(t.row-2, t.col-1));
+    }
+    if(t.row-2 >= 0 && t.col+1 < 8 && board_matrix(t.row-2, t.col+1) == gap) {
+        validMoves.push_back(Tile(t.row-2, t.col+1));
+    } else if (t.row-2 >= 0 && t.col+1 < 8 && board_matrix(t.row-2, t.col+1) >= 7) {
+        validMoves.push_back(Tile(t.row-2, t.col+1));
+    }
+    if(t.row-1 >= 0 && t.col-2 >= 0 && board_matrix(t.row-1, t.col-2) == gap) {
+        validMoves.push_back(Tile(t.row-1, t.col-2));
+    } else if (t.row-1 >= 0 && t.col-2 >= 0 && board_matrix(t.row-1, t.col-2) >= 7) {
+        validMoves.push_back(Tile(t.row-1, t.col-2));
+    }
+    if(t.row-1 >= 0 && t.col+2 < 8 && board_matrix(t.row-1, t.col+2) == gap) {
+        validMoves.push_back(Tile(t.row-1, t.col+2));
+    } else if (t.row-1 >= 0 && t.col+2 < 8 && board_matrix(t.row-1, t.col+2) >= 7) {
+        validMoves.push_back(Tile(t.row-1, t.col+2));
+    }
+    if(t.row+1 < 8 && t.col-2 >= 0 && board_matrix(t.row+1, t.col-2) == gap) {
+        validMoves.push_back(Tile(t.row+1, t.col-2));
+    } else if (t.row+1 < 8 && t.col-2 >= 0 && board_matrix(t.row+1, t.col-2) >= 7) {
+        validMoves.push_back(Tile(t.row+1, t.col-2));
+    }
+    if(t.row+1 < 8 && t.col+2 < 8 && board_matrix(t.row+1, t.col+2) == gap) {
+        validMoves.push_back(Tile(t.row+1, t.col+2));
+    } else if (t.row+1 < 8 && t.col+2 < 8 && board_matrix(t.row+1, t.col+2) >= 7) {
+        validMoves.push_back(Tile(t.row+1, t.col+2));
+    }
+    if(t.row+2 < 8 && t.col-1 >= 0 && board_matrix(t.row+2, t.col-1) == gap) {
+        validMoves.push_back(Tile(t.row+2, t.col-1));
+    } else if (t.row+2 < 8 && t.col-1 >= 0 && board_matrix(t.row+2, t.col-1) >= 7) {
+        validMoves.push_back(Tile(t.row+2, t.col-1));
+    }
+    if(t.row+2 < 8 && t.col+1 < 8 && board_matrix(t.row+2, t.col+1) == gap) {
+        validMoves.push_back(Tile(t.row+2, t.col+1));
+    } else if (t.row+2 < 8 && t.col+1 < 8 && board_matrix(t.row+2, t.col+1) >= 7) {
+        validMoves.push_back(Tile(t.row+2, t.col+1));
+    }
+
+    return validMoves;
+}
+
+std::vector<Tile> Board::getValidWhiteBishopMoves(Tile t) {
+    std::vector<Tile> validMoves;
+
+    for (int i = 1; t.row - i >= 0 && t.col - i >= 0; i++) {
+        if (board_matrix(t.row - i, t.col - i) == gap) {
+            validMoves.push_back(Tile(t.row - i, t.col - i));
+        } else if (board_matrix(t.row - i, t.col - i) >= 7) {
+            validMoves.push_back(Tile(t.row - i, t.col - i));
             break;
         } else {
             break;
         }
     }
-    for (int i = 1; row - i >= 0 && col + i < 8; i++) {
-        if (board(row - i, col + i) == gap) {
-            validMoves.push_back(std::make_pair(row - i, col + i));
-        } else if (board(row - i, col + i) >= 7) {
-            validMoves.push_back(std::make_pair(row - i, col + i));
+    for (int i = 1; t.row - i >= 0 && t.col + i < 8; i++) {
+        if (board_matrix(t.row - i, t.col + i) == gap) {
+            validMoves.push_back(Tile(t.row - i, t.col + i));
+        } else if (board_matrix(t.row - i, t.col + i) >= 7) {
+            validMoves.push_back(Tile(t.row - i, t.col + i));
             break;
         } else {
             break;
         }
     }
-    for (int i = 1; row + i < 8 && col - i >= 0; i++) {
-        if (board(row + i, col - i) == gap) {
-            validMoves.push_back(std::make_pair(row + i, col - i));
-        } else if (board(row + i, col - i) >= 7) {
-            validMoves.push_back(std::make_pair(row + i, col - i));
+    for (int i = 1; t.row + i < 8 && t.col - i >= 0; i++) {
+        if (board_matrix(t.row + i, t.col - i) == gap) {
+            validMoves.push_back(Tile(t.row + i, t.col - i));
+        } else if (board_matrix(t.row + i, t.col - i) >= 7) {
+            validMoves.push_back(Tile(t.row + i, t.col - i));
             break;
         } else {
             break;
         }
     }
-    for (int i = 1; row + i < 8 && col + i < 8; i++) {
-        if (board(row + i, col + i) == gap) {
-            validMoves.push_back(std::make_pair(row + i, col + i));
-        } else if (board(row + i, col + i) >= 7) {
-            validMoves.push_back(std::make_pair(row + i, col + i));
+    for (int i = 1; t.row + i < 8 && t.col + i < 8; i++) {
+        if (board_matrix(t.row + i, t.col + i) == gap) {
+            validMoves.push_back(Tile(t.row + i, t.col + i));
+        } else if (board_matrix(t.row + i, t.col + i) >= 7) {
+            validMoves.push_back(Tile(t.row + i, t.col + i));
             break;
         } else {
             break;
@@ -225,276 +225,276 @@ std::vector<std::pair<int,int>> Board::getValidWhiteBishopMoves(int row, int col
     return validMoves;
 }
 
-std::vector<std::pair<int,int>> Board::getValidWhiteQueenMoves(int row, int col) {
-    std::vector<std::pair<int,int>> validMoves;
-    std::vector<std::pair<int,int>> rookMoves = getValidWhiteRookMoves(row, col);
-    std::vector<std::pair<int,int>> bishopMoves = getValidWhiteBishopMoves(row, col);
+std::vector<Tile> Board::getValidWhiteQueenMoves(Tile t) {
+    std::vector<Tile> validMoves;
+    std::vector<Tile> rookMoves = getValidWhiteRookMoves(t);
+    std::vector<Tile> bishopMoves = getValidWhiteBishopMoves(t);
     validMoves.insert(validMoves.end(), rookMoves.begin(), rookMoves.end());
     validMoves.insert(validMoves.end(), bishopMoves.begin(), bishopMoves.end());
     return validMoves;
 }
 
-std::vector<std::pair<int,int>> Board::getValidWhiteKingMoves(int row, int col) {
-    std::vector<std::pair<int,int>> validMoves;
+std::vector<Tile> Board::getValidWhiteKingMoves(Tile t) {
+    std::vector<Tile> validMoves;
 
-    if(row-1 >= 0 && col-1 >= 0 && board(row-1, col-1) == gap) {
-        validMoves.push_back(std::make_pair(row-1, col-1));
-    } else if (row-1 >= 0 && col-1 >= 0 && board(row-1, col-1) >= 7) {
-        validMoves.push_back(std::make_pair(row-1, col-1));
+    if(t.row-1 >= 0 && t.col-1 >= 0 && board_matrix(t.row-1, t.col-1) == gap) {
+        validMoves.push_back(Tile(t.row-1, t.col-1));
+    } else if (t.row-1 >= 0 && t.col-1 >= 0 && board_matrix(t.row-1, t.col-1) >= 7) {
+        validMoves.push_back(Tile(t.row-1, t.col-1));
     }
-    if(row-1 >= 0 && board(row-1, col) == gap) {
-        validMoves.push_back(std::make_pair(row-1, col));
-    } else if (row-1 >= 0 && board(row-1, col) >= 7) {
-        validMoves.push_back(std::make_pair(row-1, col));
+    if(t.row-1 >= 0 && board_matrix(t.row-1, t.col) == gap) {
+        validMoves.push_back(Tile(t.row-1, t.col));
+    } else if (t.row-1 >= 0 && board_matrix(t.row-1, t.col) >= 7) {
+        validMoves.push_back(Tile(t.row-1, t.col));
     }
-    if(row-1 >= 0 && col+1 < 8 && board(row-1, col+1) == gap) {
-        validMoves.push_back(std::make_pair(row-1, col+1));
-    } else if (row-1 >= 0 && col+1 < 8 && board(row-1, col+1) >= 7) {
-        validMoves.push_back(std::make_pair(row-1, col+1));
+    if(t.row-1 >= 0 && t.col+1 < 8 && board_matrix(t.row-1, t.col+1) == gap) {
+        validMoves.push_back(Tile(t.row-1, t.col+1));
+    } else if (t.row-1 >= 0 && t.col+1 < 8 && board_matrix(t.row-1, t.col+1) >= 7) {
+        validMoves.push_back(Tile(t.row-1, t.col+1));
     }
-    if(col-1 >= 0 && board(row, col-1) == gap) {
-        validMoves.push_back(std::make_pair(row, col-1));
-    } else if (col-1 >= 0 && board(row, col-1) >= 7) {
-        validMoves.push_back(std::make_pair(row, col-1));
+    if(t.col-1 >= 0 && board_matrix(t.row, t.col-1) == gap) {
+        validMoves.push_back(Tile(t.row, t.col-1));
+    } else if (t.col-1 >= 0 && board_matrix(t.row, t.col-1) >= 7) {
+        validMoves.push_back(Tile(t.row, t.col-1));
     }
-    if(col+1 < 8 && board(row, col+1) == gap) {
-        validMoves.push_back(std::make_pair(row, col+1));
-    } else if (col+1 < 8 && board(row, col+1) >= 7) {
-        validMoves.push_back(std::make_pair(row, col+1));
+    if(t.col+1 < 8 && board_matrix(t.row, t.col+1) == gap) {
+        validMoves.push_back(Tile(t.row, t.col+1));
+    } else if (t.col+1 < 8 && board_matrix(t.row, t.col+1) >= 7) {
+        validMoves.push_back(Tile(t.row, t.col+1));
     }
-    if(row+1 < 8 && col-1 >= 0 && board(row+1, col-1) == gap) {
-        validMoves.push_back(std::make_pair(row+1, col-1));
-    } else if (row+1 < 8 && col-1 >= 0 && board(row+1, col-1) >= 7) {
-        validMoves.push_back(std::make_pair(row+1, col-1));
+    if(t.row+1 < 8 && t.col-1 >= 0 && board_matrix(t.row+1, t.col-1) == gap) {
+        validMoves.push_back(Tile(t.row+1, t.col-1));
+    } else if (t.row+1 < 8 && t.col-1 >= 0 && board_matrix(t.row+1, t.col-1) >= 7) {
+        validMoves.push_back(Tile(t.row+1, t.col-1));
     }
-    if(row+1 < 8 && board(row+1, col) == gap) {
-        validMoves.push_back(std::make_pair(row+1, col));
-    } else if (row+1 < 8 && board(row+1, col) >= 7) {
-        validMoves.push_back(std::make_pair(row+1, col));
+    if(t.row+1 < 8 && board_matrix(t.row+1, t.col) == gap) {
+        validMoves.push_back(Tile(t.row+1, t.col));
+    } else if (t.row+1 < 8 && board_matrix(t.row+1, t.col) >= 7) {
+        validMoves.push_back(Tile(t.row+1, t.col));
     }
-    if(row+1 < 8 && col+1 < 8 && board(row+1, col+1) == gap) {
-        validMoves.push_back(std::make_pair(row+1, col+1));
-    } else if (row+1 < 8 && col+1 < 8 && board(row+1, col+1) >= 7) {
-        validMoves.push_back(std::make_pair(row+1, col+1));
+    if(t.row+1 < 8 && t.col+1 < 8 && board_matrix(t.row+1, t.col+1) == gap) {
+        validMoves.push_back(Tile(t.row+1, t.col+1));
+    } else if (t.row+1 < 8 && t.col+1 < 8 && board_matrix(t.row+1, t.col+1) >= 7) {
+        validMoves.push_back(Tile(t.row+1, t.col+1));
     }
 
     return validMoves;
 }
 
 
-std::vector<std::pair<int,int>> Board::getValidBlackPawnMoves(int row, int col) {
-    std::vector<std::pair<int,int>> validMoves;
+std::vector<Tile> Board::getValidBlackPawnMoves(Tile t) {
+    std::vector<Tile> validMoves;
 
     //Move
-    if (row == 1  && board(row + 1, col) == gap && board(row + 2, col) == gap) {
-        validMoves.push_back(std::make_pair(row + 2, col));
+    if (t.row == 1  && board_matrix(t.row + 1, t.col) == gap && board_matrix(t.row + 2, t.col) == gap) {
+        validMoves.push_back(Tile(t.row + 2, t.col));
     }
-    if (row < 7 && board(row + 1, col) == gap){
-        validMoves.push_back(std::make_pair(row + 1, col));
+    if (t.row < 7 && board_matrix(t.row + 1, t.col) == gap){
+        validMoves.push_back(Tile(t.row + 1, t.col));
     }
     //Capture
-    if (row < 7 && col > 0 && board(row + 1, col - 1) < 7 && board(row + 1, col - 1) != gap) {
-        validMoves.push_back(std::make_pair(row + 1, col - 1));
+    if (t.row < 7 && t.col > 0 && board_matrix(t.row + 1, t.col - 1) < 7 && board_matrix(t.row + 1, t.col - 1) != gap) {
+        validMoves.push_back(Tile(t.row + 1, t.col - 1));
     }
-    if (row < 7 && col < 7 && board(row + 1, col + 1) < 7 && board(row + 1, col + 1) != gap) {
-        validMoves.push_back(std::make_pair(row + 1, col + 1));
-    }
-    
-    return validMoves;
-}
-
-std::vector<std::pair<int,int>> Board::getValidBlackRookMoves(int row, int col) {
-    std::vector<std::pair<int,int>> validMoves;
-
-    for (int i = row - 1; i >= 0; i--) {
-        if (board(i, col) == gap) {
-            validMoves.push_back(std::make_pair(i, col));
-        } else if (board(i, col) < 7) {
-            validMoves.push_back(std::make_pair(i, col));
-            break;
-        } else {
-            break;
-        }
-    }
-    for (int i = row + 1; i < 8; i++) {
-        if (board(i, col) == gap) {
-            validMoves.push_back(std::make_pair(i, col));
-        } else if(board(i, col) < 7) {
-            validMoves.push_back(std::make_pair(i, col));
-            break;
-        } else {
-            break;
-        }
-    }
-    for (int i = col - 1; i >= 0; i--) {
-        if (board(row, i) == gap) {
-            validMoves.push_back(std::make_pair(row, i));
-        } else if(board(row, i) < 7) {
-            validMoves.push_back(std::make_pair(row, i));
-            break;
-        } else {
-            break;
-        }
-    }
-    for (int i = col + 1; i < 8; i++) {
-        if (board(row, i) == gap) {
-            validMoves.push_back(std::make_pair(row, i));
-        } else if(board(row, i) < 7) {
-            validMoves.push_back(std::make_pair(row, i));
-            break;
-        } else {
-            break;
-        }
-    }
-
-    return validMoves;
-}
-
-std::vector<std::pair<int,int>> Board::getValidBlackKnightMoves(int row, int col) {
-    std::vector<std::pair<int,int>> validMoves;
-
-    if(row-2 >= 0 && col-1 >= 0 && board(row-2, col-1) == gap) {
-        validMoves.push_back(std::make_pair(row-2, col-1));
-    } else if (row-2 >= 0 && col-1 >= 0 && board(row-2, col-1) < 7) {
-        validMoves.push_back(std::make_pair(row-2, col-1));
-    }
-    if(row-2 >= 0 && col+1 < 8 && board(row-2, col+1) == gap) {
-        validMoves.push_back(std::make_pair(row-2, col+1));
-    } else if (row-2 >= 0 && col+1 < 8 && board(row-2, col+1) < 7) {
-        validMoves.push_back(std::make_pair(row-2, col+1));
-    }
-    if(row-1 >= 0 && col-2 >= 0 && board(row-1, col-2) == gap) {
-        validMoves.push_back(std::make_pair(row-1, col-2));
-    } else if (row-1 >= 0 && col-2 >= 0 && board(row-1, col-2) < 7) {
-        validMoves.push_back(std::make_pair(row-1, col-2));
-    }
-    if(row-1 >= 0 && col+2 < 8 && board(row-1, col+2) == gap) {
-        validMoves.push_back(std::make_pair(row-1, col+2));
-    } else if (row-1 >= 0 && col+2 < 8 && board(row-1, col+2) < 7) {
-        validMoves.push_back(std::make_pair(row-1, col+2));
-    }
-    if(row+1 < 8 && col-2 >= 0 && board(row+1, col-2) == gap) {
-        validMoves.push_back(std::make_pair(row+1, col-2));
-    } else if (row+1 < 8 && col-2 >= 0 && board(row+1, col-2) < 7) {
-        validMoves.push_back(std::make_pair(row+1, col-2));
-    }
-    if(row+1 < 8 && col+2 < 8 && board(row+1, col+2) == gap) {
-        validMoves.push_back(std::make_pair(row+1, col+2));
-    } else if (row+1 < 8 && col+2 < 8 && board(row+1, col+2) < 7) {
-        validMoves.push_back(std::make_pair(row+1, col+2));
-    }
-    if(row+2 < 8 && col-1 >= 0 && board(row+2, col-1) == gap) {
-        validMoves.push_back(std::make_pair(row+2, col-1));
-    } else if (row+2 < 8 && col-1 >= 0 && board(row+2, col-1) < 7) {
-        validMoves.push_back(std::make_pair(row+2, col-1));
-    }
-    if(row+2 < 8 && col+1 < 8 && board(row+2, col+1) == gap) {
-        validMoves.push_back(std::make_pair(row+2, col+1));
-    } else if (row+2 < 8 && col+1 < 8 && board(row+2, col+1) < 7) {
-        validMoves.push_back(std::make_pair(row+2, col+1));
-    }
-
-    return validMoves;
-}
-
-std::vector<std::pair<int,int>> Board::getValidBlackBishopMoves(int row, int col) {
-    std::vector<std::pair<int,int>> validMoves;
-
-    for (int i = 1; row - i >= 0 && col - i >= 0; i++) {
-        if (board(row - i, col - i) == gap) {
-            validMoves.push_back(std::make_pair(row - i, col - i));
-        } else if (board(row - i, col - i) < 7) {
-            validMoves.push_back(std::make_pair(row - i, col - i));
-            break;
-        } else {
-            break;
-        }
-    }
-    for (int i = 1; row - i >= 0 && col + i < 8; i++) {
-        if (board(row - i, col + i) == gap) {
-            validMoves.push_back(std::make_pair(row - i, col + i));
-        } else if (board(row - i, col + i) < 7) {
-            validMoves.push_back(std::make_pair(row - i, col + i));
-            break;
-        } else {
-            break;
-        }
-    }
-    for (int i = 1; row + i < 8 && col - i >= 0; i++) {
-        if (board(row + i, col - i) == gap) {
-            validMoves.push_back(std::make_pair(row + i, col - i));
-        } else if (board(row + i, col - i) < 7) {
-            validMoves.push_back(std::make_pair(row + i, col - i));
-            break;
-        } else {
-            break;
-        }
-    }
-    for (int i = 1; row + i < 8 && col + i < 8; i++) {
-        if (board(row + i, col + i) == gap) {
-            validMoves.push_back(std::make_pair(row + i, col + i));
-        } else if (board(row + i, col + i) < 7) {
-            validMoves.push_back(std::make_pair(row + i, col + i));
-            break;
-        } else {
-            break;
-        }
+    if (t.row < 7 && t.col < 7 && board_matrix(t.row + 1, t.col + 1) < 7 && board_matrix(t.row + 1, t.col + 1) != gap) {
+        validMoves.push_back(Tile(t.row + 1, t.col + 1));
     }
     
     return validMoves;
 }
 
-std::vector<std::pair<int,int>> Board::getValidBlackQueenMoves(int row, int col) {
-    std::vector<std::pair<int,int>> validMoves;
-    std::vector<std::pair<int,int>> rookMoves = getValidBlackRookMoves(row, col);
-    std::vector<std::pair<int,int>> bishopMoves = getValidBlackBishopMoves(row, col);
+std::vector<Tile> Board::getValidBlackRookMoves(Tile t) {
+    std::vector<Tile> validMoves;
+
+    for (int i = t.row - 1; i >= 0; i--) {
+        if (board_matrix(i, t.col) == gap) {
+            validMoves.push_back(Tile(i, t.col));
+        } else if (board_matrix(i, t.col) < 7) {
+            validMoves.push_back(Tile(i, t.col));
+            break;
+        } else {
+            break;
+        }
+    }
+    for (int i = t.row + 1; i < 8; i++) {
+        if (board_matrix(i, t.col) == gap) {
+            validMoves.push_back(Tile(i, t.col));
+        } else if(board_matrix(i, t.col) < 7) {
+            validMoves.push_back(Tile(i, t.col));
+            break;
+        } else {
+            break;
+        }
+    }
+    for (int i = t.col - 1; i >= 0; i--) {
+        if (board_matrix(t.row, i) == gap) {
+            validMoves.push_back(Tile(t.row, i));
+        } else if(board_matrix(t.row, i) < 7) {
+            validMoves.push_back(Tile(t.row, i));
+            break;
+        } else {
+            break;
+        }
+    }
+    for (int i = t.col + 1; i < 8; i++) {
+        if (board_matrix(t.row, i) == gap) {
+            validMoves.push_back(Tile(t.row, i));
+        } else if(board_matrix(t.row, i) < 7) {
+            validMoves.push_back(Tile(t.row, i));
+            break;
+        } else {
+            break;
+        }
+    }
+
+    return validMoves;
+}
+
+std::vector<Tile> Board::getValidBlackKnightMoves(Tile t) {
+    std::vector<Tile> validMoves;
+
+    if(t.row-2 >= 0 && t.col-1 >= 0 && board_matrix(t.row-2, t.col-1) == gap) {
+        validMoves.push_back(Tile(t.row-2, t.col-1));
+    } else if (t.row-2 >= 0 && t.col-1 >= 0 && board_matrix(t.row-2, t.col-1) < 7) {
+        validMoves.push_back(Tile(t.row-2, t.col-1));
+    }
+    if(t.row-2 >= 0 && t.col+1 < 8 && board_matrix(t.row-2, t.col+1) == gap) {
+        validMoves.push_back(Tile(t.row-2, t.col+1));
+    } else if (t.row-2 >= 0 && t.col+1 < 8 && board_matrix(t.row-2, t.col+1) < 7) {
+        validMoves.push_back(Tile(t.row-2, t.col+1));
+    }
+    if(t.row-1 >= 0 && t.col-2 >= 0 && board_matrix(t.row-1, t.col-2) == gap) {
+        validMoves.push_back(Tile(t.row-1, t.col-2));
+    } else if (t.row-1 >= 0 && t.col-2 >= 0 && board_matrix(t.row-1, t.col-2) < 7) {
+        validMoves.push_back(Tile(t.row-1, t.col-2));
+    }
+    if(t.row-1 >= 0 && t.col+2 < 8 && board_matrix(t.row-1, t.col+2) == gap) {
+        validMoves.push_back(Tile(t.row-1, t.col+2));
+    } else if (t.row-1 >= 0 && t.col+2 < 8 && board_matrix(t.row-1, t.col+2) < 7) {
+        validMoves.push_back(Tile(t.row-1, t.col+2));
+    }
+    if(t.row+1 < 8 && t.col-2 >= 0 && board_matrix(t.row+1, t.col-2) == gap) {
+        validMoves.push_back(Tile(t.row+1, t.col-2));
+    } else if (t.row+1 < 8 && t.col-2 >= 0 && board_matrix(t.row+1, t.col-2) < 7) {
+        validMoves.push_back(Tile(t.row+1, t.col-2));
+    }
+    if(t.row+1 < 8 && t.col+2 < 8 && board_matrix(t.row+1, t.col+2) == gap) {
+        validMoves.push_back(Tile(t.row+1, t.col+2));
+    } else if (t.row+1 < 8 && t.col+2 < 8 && board_matrix(t.row+1, t.col+2) < 7) {
+        validMoves.push_back(Tile(t.row+1, t.col+2));
+    }
+    if(t.row+2 < 8 && t.col-1 >= 0 && board_matrix(t.row+2, t.col-1) == gap) {
+        validMoves.push_back(Tile(t.row+2, t.col-1));
+    } else if (t.row+2 < 8 && t.col-1 >= 0 && board_matrix(t.row+2, t.col-1) < 7) {
+        validMoves.push_back(Tile(t.row+2, t.col-1));
+    }
+    if(t.row+2 < 8 && t.col+1 < 8 && board_matrix(t.row+2, t.col+1) == gap) {
+        validMoves.push_back(Tile(t.row+2, t.col+1));
+    } else if (t.row+2 < 8 && t.col+1 < 8 && board_matrix(t.row+2, t.col+1) < 7) {
+        validMoves.push_back(Tile(t.row+2, t.col+1));
+    }
+
+    return validMoves;
+}
+
+std::vector<Tile> Board::getValidBlackBishopMoves(Tile t) {
+    std::vector<Tile> validMoves;
+
+    for (int i = 1; t.row - i >= 0 && t.col - i >= 0; i++) {
+        if (board_matrix(t.row - i, t.col - i) == gap) {
+            validMoves.push_back(Tile(t.row - i, t.col - i));
+        } else if (board_matrix(t.row - i, t.col - i) < 7) {
+            validMoves.push_back(Tile(t.row - i, t.col - i));
+            break;
+        } else {
+            break;
+        }
+    }
+    for (int i = 1; t.row - i >= 0 && t.col + i < 8; i++) {
+        if (board_matrix(t.row - i, t.col + i) == gap) {
+            validMoves.push_back(Tile(t.row - i, t.col + i));
+        } else if (board_matrix(t.row - i, t.col + i) < 7) {
+            validMoves.push_back(Tile(t.row - i, t.col + i));
+            break;
+        } else {
+            break;
+        }
+    }
+    for (int i = 1; t.row + i < 8 && t.col - i >= 0; i++) {
+        if (board_matrix(t.row + i, t.col - i) == gap) {
+            validMoves.push_back(Tile(t.row + i, t.col - i));
+        } else if (board_matrix(t.row + i, t.col - i) < 7) {
+            validMoves.push_back(Tile(t.row + i, t.col - i));
+            break;
+        } else {
+            break;
+        }
+    }
+    for (int i = 1; t.row + i < 8 && t.col + i < 8; i++) {
+        if (board_matrix(t.row + i, t.col + i) == gap) {
+            validMoves.push_back(Tile(t.row + i, t.col + i));
+        } else if (board_matrix(t.row + i, t.col + i) < 7) {
+            validMoves.push_back(Tile(t.row + i, t.col + i));
+            break;
+        } else {
+            break;
+        }
+    }
+    
+    return validMoves;
+}
+
+std::vector<Tile> Board::getValidBlackQueenMoves(Tile t) {
+    std::vector<Tile> validMoves;
+    std::vector<Tile> rookMoves = getValidBlackRookMoves(t);
+    std::vector<Tile> bishopMoves = getValidBlackBishopMoves(t);
     validMoves.insert(validMoves.end(), rookMoves.begin(), rookMoves.end());
     validMoves.insert(validMoves.end(), bishopMoves.begin(), bishopMoves.end());
     return validMoves;
 }
 
-std::vector<std::pair<int,int>> Board::getValidBlackKingMoves(int row, int col) {
-    std::vector<std::pair<int,int>> validMoves;
+std::vector<Tile> Board::getValidBlackKingMoves(Tile t) {
+    std::vector<Tile> validMoves;
 
-    if(row-1 >= 0 && col-1 >= 0 && board(row-1, col-1) == gap) {
-        validMoves.push_back(std::make_pair(row-1, col-1));
-    } else if (row-1 >= 0 && col-1 >= 0 && board(row-1, col-1) < 7) {
-        validMoves.push_back(std::make_pair(row-1, col-1));
+    if(t.row-1 >= 0 && t.col-1 >= 0 && board_matrix(t.row-1, t.col-1) == gap) {
+        validMoves.push_back(Tile(t.row-1, t.col-1));
+    } else if (t.row-1 >= 0 && t.col-1 >= 0 && board_matrix(t.row-1, t.col-1) < 7) {
+        validMoves.push_back(Tile(t.row-1, t.col-1));
     }
-    if(row-1 >= 0 && board(row-1, col) == gap) {
-        validMoves.push_back(std::make_pair(row-1, col));
-    } else if (row-1 >= 0 && board(row-1, col) < 7) {
-        validMoves.push_back(std::make_pair(row-1, col));
+    if(t.row-1 >= 0 && board_matrix(t.row-1, t.col) == gap) {
+        validMoves.push_back(Tile(t.row-1, t.col));
+    } else if (t.row-1 >= 0 && board_matrix(t.row-1, t.col) < 7) {
+        validMoves.push_back(Tile(t.row-1, t.col));
     }
-    if(row-1 >= 0 && col+1 < 8 && board(row-1, col+1) == gap) {
-        validMoves.push_back(std::make_pair(row-1, col+1));
-    } else if (row-1 >= 0 && col+1 < 8 && board(row-1, col+1) < 7) {
-        validMoves.push_back(std::make_pair(row-1, col+1));
+    if(t.row-1 >= 0 && t.col+1 < 8 && board_matrix(t.row-1, t.col+1) == gap) {
+        validMoves.push_back(Tile(t.row-1, t.col+1));
+    } else if (t.row-1 >= 0 && t.col+1 < 8 && board_matrix(t.row-1, t.col+1) < 7) {
+        validMoves.push_back(Tile(t.row-1, t.col+1));
     }
-    if(col-1 >= 0 && board(row, col-1) == gap) {
-        validMoves.push_back(std::make_pair(row, col-1));
-    } else if (col-1 >= 0 && board(row, col-1) < 7) {
-        validMoves.push_back(std::make_pair(row, col-1));
+    if(t.col-1 >= 0 && board_matrix(t.row, t.col-1) == gap) {
+        validMoves.push_back(Tile(t.row, t.col-1));
+    } else if (t.col-1 >= 0 && board_matrix(t.row, t.col-1) < 7) {
+        validMoves.push_back(Tile(t.row, t.col-1));
     }
-    if(col+1 < 8 && board(row, col+1) == gap) {
-        validMoves.push_back(std::make_pair(row, col+1));
-    } else if (col+1 < 8 && board(row, col+1) < 7) {
-        validMoves.push_back(std::make_pair(row, col+1));
+    if(t.col+1 < 8 && board_matrix(t.row, t.col+1) == gap) {
+        validMoves.push_back(Tile(t.row, t.col+1));
+    } else if (t.col+1 < 8 && board_matrix(t.row, t.col+1) < 7) {
+        validMoves.push_back(Tile(t.row, t.col+1));
     }
-    if(row+1 < 8 && col-1 >= 0 && board(row+1, col-1) == gap) {
-        validMoves.push_back(std::make_pair(row+1, col-1));
-    } else if (row+1 < 8 && col-1 >= 0 && board(row+1, col-1) < 7) {
-        validMoves.push_back(std::make_pair(row+1, col-1));
+    if(t.row+1 < 8 && t.col-1 >= 0 && board_matrix(t.row+1, t.col-1) == gap) {
+        validMoves.push_back(Tile(t.row+1, t.col-1));
+    } else if (t.row+1 < 8 && t.col-1 >= 0 && board_matrix(t.row+1, t.col-1) < 7) {
+        validMoves.push_back(Tile(t.row+1, t.col-1));
     }
-    if(row+1 < 8 && board(row+1, col) == gap) {
-        validMoves.push_back(std::make_pair(row+1, col));
-    } else if (row+1 < 8 && board(row+1, col) < 7) {
-        validMoves.push_back(std::make_pair(row+1, col));
+    if(t.row+1 < 8 && board_matrix(t.row+1, t.col) == gap) {
+        validMoves.push_back(Tile(t.row+1, t.col));
+    } else if (t.row+1 < 8 && board_matrix(t.row+1, t.col) < 7) {
+        validMoves.push_back(Tile(t.row+1, t.col));
     }
-    if(row+1 < 8 && col+1 < 8 && board(row+1, col+1) == gap) {
-        validMoves.push_back(std::make_pair(row+1, col+1));
-    } else if (row+1 < 8 && col+1 < 8 && board(row+1, col+1) < 7) {
-        validMoves.push_back(std::make_pair(row+1, col+1));
+    if(t.row+1 < 8 && t.col+1 < 8 && board_matrix(t.row+1, t.col+1) == gap) {
+        validMoves.push_back(Tile(t.row+1, t.col+1));
+    } else if (t.row+1 < 8 && t.col+1 < 8 && board_matrix(t.row+1, t.col+1) < 7) {
+        validMoves.push_back(Tile(t.row+1, t.col+1));
     }
 
     return validMoves;

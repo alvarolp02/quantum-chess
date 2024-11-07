@@ -1,5 +1,6 @@
 #include <iostream>
 #include <Eigen/Dense>
+#include "structs.hpp"
 
 #define gap 0
 #define w_pawn 1
@@ -20,28 +21,28 @@ class Board {
     public:
         Board();
 
-        void movePiece(int row0, int col0, int row1, int col1);
-        std::vector<std::pair<int,int>> getValidMoves(int row, int col);
+        void movePiece(Tile source, Tile target);
+        std::vector<Tile> getValidMoves(Tile t);
         void printBoard();
-        bool isWhite(int row, int col);
-        bool isBlack(int row, int col);
+        bool isWhite(Tile t);
+        bool isBlack(Tile t);
 
 
-        Eigen::Matrix<int, 8, 8> board;
+        Eigen::Matrix<int, 8, 8> board_matrix;
 
     private:
-        std::vector<std::pair<int,int>> getValidWhitePawnMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidWhiteRookMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidWhiteKnightMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidWhiteBishopMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidWhiteQueenMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidWhiteKingMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidBlackPawnMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidBlackRookMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidBlackKnightMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidBlackBishopMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidBlackQueenMoves(int row, int col);
-        std::vector<std::pair<int,int>> getValidBlackKingMoves(int row, int col);
+        std::vector<Tile> getValidWhitePawnMoves(Tile t);
+        std::vector<Tile> getValidWhiteRookMoves(Tile t);
+        std::vector<Tile> getValidWhiteKnightMoves(Tile t);
+        std::vector<Tile> getValidWhiteBishopMoves(Tile t);
+        std::vector<Tile> getValidWhiteQueenMoves(Tile t);
+        std::vector<Tile> getValidWhiteKingMoves(Tile t);
+        std::vector<Tile> getValidBlackPawnMoves(Tile t);
+        std::vector<Tile> getValidBlackRookMoves(Tile t);
+        std::vector<Tile> getValidBlackKnightMoves(Tile t);
+        std::vector<Tile> getValidBlackBishopMoves(Tile t);
+        std::vector<Tile> getValidBlackQueenMoves(Tile t);
+        std::vector<Tile> getValidBlackKingMoves(Tile t);
 
 
         // void setupPieces();
