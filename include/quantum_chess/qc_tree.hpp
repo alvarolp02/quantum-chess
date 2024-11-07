@@ -14,7 +14,18 @@ class QCTree {
 
         void print_tree();
 
+        void get_ponderated_board();
+
+        Eigen::Matrix<double, 8, 8> pond_board;
+        Eigen::Matrix<int, 8, 8> q_board;
+
+    private: 
         void print_tree_aux(QCNode* node, std::string prefix, bool split);
+
+        std::vector<Eigen::Matrix<int, 8, 8>> get_all_boards();
+
+        std::vector<Eigen::Matrix<int, 8, 8>> get_all_boards_aux(QCNode* node, 
+                                                            std::vector<Eigen::Matrix<int, 8, 8>> acum);
 
         QCNode* root;
 };

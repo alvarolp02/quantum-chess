@@ -139,10 +139,10 @@ void Interface::loadMovements(std::vector<Tile> movements){
         tile.setFillColor(sf::Color::Transparent);
         window.draw(tile);
 
-        circle.setPosition(movements[i].col * TILE_SIZE, movements[i].row * TILE_SIZE);
-        circle.setOutlineColor(green);
-        circle.setOutlineThickness(5);
-        circle.setFillColor(sf::Color::Transparent);
-        window.draw(circle);
+        // circle.setPosition(movements[i].col * TILE_SIZE, movements[i].row * TILE_SIZE);
+        // circle.setOutlineColor(green);
+        // circle.setOutlineThickness(5);
+        // circle.setFillColor(sf::Color::Transparent);
+        // window.draw(circle);
     }
 }

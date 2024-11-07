@@ -40,4 +40,49 @@ void QCTree::print_tree_aux(QCNode* node, std::string prefix, bool split = false
     
 }
 
+std::vector<Eigen::Matrix<int, 8, 8>> QCTree::get_all_boards(){
+    std::vector<Eigen::Matrix<int, 8, 8>> boards = get_all_boards_aux(root, {});
+    return boards;
+}
+
+std::vector<Eigen::Matrix<int, 8, 8>> QCTree::get_all_boards_aux(QCNode* node, 
+                                                    std::vector<Eigen::Matrix<int, 8, 8>> acum){
+    if(node->next != nullptr){
+        acum = get_all_boards_aux(node->next, acum);
+    }else if(node->split1 != nullptr && node->split2 != nullptr){
+        auto acum_aux = get_all_boards_aux(node->split1, acum);
+        acum = get_all_boards_aux(node->split2, acum_aux);
+    } else {
+        acum.push_back(node->board.board_matrix);
+    }
+
+    return acum;
+}
+
+void QCTree::get_ponderated_board(){
+    auto boards = get_all_boards();
+    int n_boards = boards.size();
+
+    pond_board = Eigen::Matrix<double, 8, 8>::Zero();
+    q_board = Eigen::Matrix<int, 8, 8>::Zero();
+
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            double sum = 0.0;
+            for (auto board : boards) {
+                if (board(i, j) != 0) {
+                    sum+=1;
+                    if(q_board(i, j) == 0){
+                        q_board(i, j) = board(i, j);
+                    } else if (q_board(i, j) != board(i, j)){
+                        std::cout << "Error: Different pieces in the same tile" << std::endl;
+                    }
+                }
+            }
+            pond_board(i, j) = sum/n_boards;
+        }
+    }
+
+}
+
 

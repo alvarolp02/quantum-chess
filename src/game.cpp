@@ -39,6 +39,11 @@ int main(int argc, char * argv[])
           tree.propagate(selectedPiece, target);
           tree.print_tree();
           interface.loadBoard();
+
+          tree.get_ponderated_board();
+          std::cout << tree.pond_board << std::endl;
+          std::cout << tree.q_board << std::endl;
+
           interface.loadPieces(B.board_matrix);
           interface.window.display();
           turn = turn == "white" ? "black" : "white"; 
@@ -79,6 +84,11 @@ int main(int argc, char * argv[])
           tree.print_tree();
           interface.loadBoard();
           interface.loadTree(tree);
+
+          tree.get_ponderated_board();
+          std::cout << tree.pond_board << std::endl;
+          std::cout << tree.q_board << std::endl;
+          
           interface.loadPieces(B.board_matrix);
           interface.window.display();
           turn = turn == "white" ? "black" : "white"; 
