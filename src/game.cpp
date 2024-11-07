@@ -44,7 +44,8 @@ int main(int argc, char * argv[])
           std::cout << tree.pond_board << std::endl;
           std::cout << tree.q_board << std::endl;
 
-          interface.loadPieces(B.board_matrix);
+          interface.loadPieces(tree.q_board);
+          interface.loadPonderation(tree.pond_board);
           interface.window.display();
           turn = turn == "white" ? "black" : "white"; 
           movements.clear();
@@ -62,7 +63,9 @@ int main(int argc, char * argv[])
 
           movements = B.getValidMoves(input);
           interface.loadBoard();
-          interface.loadPieces(B.board_matrix);
+          tree.get_ponderated_board();
+          interface.loadPieces(tree.q_board);
+          interface.loadPonderation(tree.pond_board);
           interface.loadMovements(movements);
           interface.window.display();
 
@@ -88,8 +91,9 @@ int main(int argc, char * argv[])
           tree.get_ponderated_board();
           std::cout << tree.pond_board << std::endl;
           std::cout << tree.q_board << std::endl;
-          
-          interface.loadPieces(B.board_matrix);
+
+          interface.loadPieces(tree.q_board);
+          interface.loadPonderation(tree.pond_board);
           interface.window.display();
           turn = turn == "white" ? "black" : "white"; 
           movements.clear();

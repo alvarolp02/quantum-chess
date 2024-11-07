@@ -12,6 +12,7 @@ class Interface {
         void loadBoard();
         void loadTree(QCTree);
         void loadPieces(Eigen::Matrix<int, 8, 8>);
+        void loadPonderation(Eigen::Matrix<double, 8, 8>);
         void loadMovements(std::vector<Tile>);
         std::vector<Tile> waitForInput();
 
