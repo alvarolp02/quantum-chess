@@ -118,7 +118,9 @@ void Interface::loadMovements(std::vector<std::pair<int,int>> movements){
 
     for (int i = 0; i < movements.size(); i++) {
         tile.setPosition(movements[i].second * TILE_SIZE, movements[i].first * TILE_SIZE);
-        tile.setFillColor(green);
+        tile.setOutlineColor(green);
+        tile.setOutlineThickness(5);
+        tile.setFillColor(sf::Color::Transparent);
         window.draw(tile);
     }
 }
