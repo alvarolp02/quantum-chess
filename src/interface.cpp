@@ -11,8 +11,9 @@ void Interface::openWindow() {
     }
 }
 
-Tile Interface::waitForInput(){
+std::vector<Tile> Interface::waitForInput(){
     sf::Event event;
+    std::vector<Tile> movements;
     while (window.waitEvent(event)) {
         // Close window
         if (event.type == sf::Event::Closed)
@@ -24,10 +25,20 @@ Tile Interface::waitForInput(){
                 int x = event.mouseButton.y / TILE_SIZE; // Rows
                 int y = event.mouseButton.x / TILE_SIZE; // Columns
 
-                return Tile(x, y);
+                return {Tile(x, y)};
+            } else if (event.mouseButton.button == sf::Mouse::Right) {
+                int x = event.mouseButton.y / TILE_SIZE; // Rows
+                int y = event.mouseButton.x / TILE_SIZE; // Columns
+                if (movements.size() == 0) {
+                    movements.push_back(Tile(x, y));
+                } else if (movements.size() == 1) {
+                    movements.push_back(Tile(x, y));
+                    return movements;
+                }
             }
         }
     }
+    return {Tile(-1, -1)};
 }
 
 void Interface::loadBoard(){

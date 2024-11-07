@@ -11,7 +11,7 @@ class Interface {
         void loadBoard();
         void loadPieces(Eigen::Matrix<int, 8, 8>);
         void loadMovements(std::vector<Tile>);
-        Tile waitForInput();
+        std::vector<Tile> waitForInput();
 
         sf::RenderWindow window;
 

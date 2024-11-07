@@ -2,6 +2,9 @@
 #include <Eigen/Dense>
 #include "structs.hpp"
 
+#ifndef BOARD_H
+#define BOARD_H
+
 #define gap 0
 #define w_pawn 1
 #define w_rook 2
@@ -48,3 +51,5 @@ class Board {
         // void setupPieces();
         // bool isValidMove(int startX, int startY, int endX, int endY) const;
 };
+
+#endif // BOARD_H
