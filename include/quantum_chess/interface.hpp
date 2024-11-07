@@ -1,7 +1,8 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <Eigen/Dense>
-#include "structs.hpp"
+#include "quantum_chess/qc_tree.hpp"
+#include "quantum_chess/structs.hpp"
 
 
 class Interface {
@@ -9,6 +10,7 @@ class Interface {
         Interface();
         void openWindow();
         void loadBoard();
+        void loadTree(QCTree);
         void loadPieces(Eigen::Matrix<int, 8, 8>);
         void loadMovements(std::vector<Tile>);
         std::vector<Tile> waitForInput();

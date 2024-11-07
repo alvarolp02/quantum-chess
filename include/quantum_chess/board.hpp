@@ -1,9 +1,9 @@
+#ifndef BOARD_H
+#define BOARD_H
+
 #include <iostream>
 #include <Eigen/Dense>
 #include "structs.hpp"
-
-#ifndef BOARD_H
-#define BOARD_H
 
 #define gap 0
 #define w_pawn 1

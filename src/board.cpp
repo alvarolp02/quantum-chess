@@ -14,8 +14,10 @@ Board::Board() {
 }
 
 void Board::movePiece(Tile source, Tile target) {
-    board_matrix(target.row, target.col) = board_matrix(source.row, source.col);
-    board_matrix(source.row, source.col) = gap;
+    if(board_matrix(source.row, source.col)!=gap){
+        board_matrix(target.row, target.col) = board_matrix(source.row, source.col);
+        board_matrix(source.row, source.col) = gap;
+    }
 }
 
 void Board::printBoard() {

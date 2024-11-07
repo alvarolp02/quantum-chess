@@ -1,8 +1,8 @@
-#include <iostream>
-#include <vector>
-
 #ifndef TILE_H
 #define TILE_H
+
+#include <iostream>
+#include <vector>
 
 std::vector<std::string> letters = {
     {"a", "b", "c", "d", "e", "f", "g", "h"}

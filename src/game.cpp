@@ -1,12 +1,14 @@
 #include "interface.cpp"
-#include "qChessTree.cpp"
+#include "board.cpp"
+#include "qc_tree.cpp"
+#include "qc_node.cpp"
 #include <thread>
 
 
 int main(int argc, char * argv[])
 {
   Board B = Board();
-  qChessTree tree = qChessTree(B);
+  QCTree tree = QCTree(B);
 
   Interface interface = Interface();
   std::thread thread_0(&Interface::openWindow, &interface); 
@@ -76,6 +78,7 @@ int main(int argc, char * argv[])
           tree.split(selectedPiece, target1, target2);
           tree.print_tree();
           interface.loadBoard();
+          interface.loadTree(tree);
           interface.loadPieces(B.board_matrix);
           interface.window.display();
           turn = turn == "white" ? "black" : "white"; 

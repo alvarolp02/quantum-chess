@@ -57,6 +57,10 @@ void Interface::loadBoard(){
     }
 }
 
+void Interface::loadTree(QCTree tree){
+    
+}
+
 void Interface::loadPieces(Eigen::Matrix<int, 8, 8> board){
 
     for (int i = 0; i < BOARD_SIZE; ++i) {
@@ -126,6 +130,7 @@ void Interface::loadMovements(std::vector<Tile> movements){
     sf::Color green(0, 255, 0);
 
     sf::RectangleShape tile(sf::Vector2f(TILE_SIZE, TILE_SIZE));
+    sf::CircleShape circle(TILE_SIZE/2,60);
 
     for (int i = 0; i < movements.size(); i++) {
         tile.setPosition(movements[i].col * TILE_SIZE, movements[i].row * TILE_SIZE);
@@ -133,5 +138,11 @@ void Interface::loadMovements(std::vector<Tile> movements){
         tile.setOutlineThickness(5);
         tile.setFillColor(sf::Color::Transparent);
         window.draw(tile);
+
+        circle.setPosition(movements[i].col * TILE_SIZE, movements[i].row * TILE_SIZE);
+        circle.setOutlineColor(green);
+        circle.setOutlineThickness(5);
+        circle.setFillColor(sf::Color::Transparent);
+        window.draw(circle);
     }
 }
