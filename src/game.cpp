@@ -3,6 +3,22 @@
 #include "board.cpp"
 #include "qc_node.cpp"
 #include <thread>
+#include <random>
+
+void print_interface(Interface* interface, QCTree* tree){
+  interface->loadBoard();
+  interface->loadPieces(tree->q_board.board_matrix);
+  interface->loadPonderation(tree->pond_matrix);
+  interface->window.display();
+}
+
+void print_interface(Interface* interface, QCTree* tree, std::vector<Tile> movements){
+  interface->loadBoard();
+  interface->loadPieces(tree->q_board.board_matrix);
+  interface->loadPonderation(tree->pond_matrix);
+  interface->loadMovements(movements);
+  interface->window.display();
+}
 
 
 int main(int argc, char * argv[])
@@ -13,10 +29,8 @@ int main(int argc, char * argv[])
   std::thread thread_0(&Interface::openWindow, &interface); 
   std::string turn = "white";
 
- 
-  interface.loadBoard();
-  interface.loadPieces(tree.q_board.board_matrix);
-  interface.window.display();
+  tree.get_ponderated_board();
+  print_interface(&interface, &tree);
 
   std::vector<Tile> movements;
   Tile selectedPiece;
@@ -34,14 +48,30 @@ int main(int argc, char * argv[])
         if (is_target) {
           Tile target = input;
 
-          tree.propagate(selectedPiece, target);
-          tree.print_tree();
-          interface.loadBoard();
+          bool source_is_quantum = tree.pond_matrix(selectedPiece.row, selectedPiece.col) != 1.00;
+          bool target_occupied = tree.q_board.board_matrix(target.row, target.col) != 0;
+          
+          // If a quantum piece is used to capture an occupied tile, collapse the piece
+          if(source_is_quantum && target_occupied){
+            tree.collapse(selectedPiece);
+            tree.get_ponderated_board();
 
+            // If the piece is real, capture the target
+            if(tree.q_board.board_matrix(selectedPiece.row, selectedPiece.col) != 0){
+              tree.propagate(selectedPiece, target);
+              std::cout<< "Move: "<<selectedPiece.to_string()<<" "<<target.to_string()<<std::endl;
+            }
+
+          // In other cases, just move the piece
+          } else {
+            tree.propagate(selectedPiece, target);
+            std::cout<< "Move: "<<selectedPiece.to_string()<<" "<<target.to_string()<<std::endl;
+          }
+
+          tree.print_tree();
           tree.get_ponderated_board();
-          interface.loadPieces(tree.q_board.board_matrix);
-          interface.loadPonderation(tree.pond_matrix);
-          interface.window.display();
+
+          print_interface(&interface, &tree);
           turn = turn == "white" ? "black" : "white"; 
           movements.clear();
           Tile selectedPiece;
@@ -56,13 +86,9 @@ int main(int argc, char * argv[])
             continue;
           }
 
-          interface.loadBoard();
           tree.get_ponderated_board();
           movements = tree.q_board.getValidMoves(input);
-          interface.loadPieces(tree.q_board.board_matrix);
-          interface.loadPonderation(tree.pond_matrix);
-          interface.loadMovements(movements);
-          interface.window.display();
+          print_interface(&interface, &tree, movements);
 
           selectedPiece = input;
         }
@@ -78,14 +104,12 @@ int main(int argc, char * argv[])
         if (target1_ok && target2_ok && !(target1==target2)) {
 
           tree.split(selectedPiece, target1, target2);
-          tree.print_tree();
-          interface.loadBoard();
-          interface.loadTree(tree);
+          std::cout<<"Split: "<<selectedPiece.to_string()<<" "<< 
+                target1.to_string()<<" "<<target2.to_string()<<std::endl;
 
+          tree.print_tree();
           tree.get_ponderated_board();
-          interface.loadPieces(tree.q_board.board_matrix);
-          interface.loadPonderation(tree.pond_matrix);
-          interface.window.display();
+          print_interface(&interface, &tree);
           turn = turn == "white" ? "black" : "white"; 
           movements.clear();
           Tile selectedPiece;

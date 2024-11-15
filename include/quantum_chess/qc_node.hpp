@@ -14,9 +14,8 @@ class QCNode {
 
         int index;
         Board board;
-        QCNode* next;
-        QCNode* split1;
-        QCNode* split2;
+        QCNode* left;
+        QCNode* right;
 };
 
 #endif // QCNODE_H

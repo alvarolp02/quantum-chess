@@ -59,9 +59,6 @@ void Interface::loadBoard(){
     }
 }
 
-void Interface::loadTree(QCTree tree){
-    
-}
 
 void Interface::loadPieces(Eigen::Matrix<int, 8, 8> board){
 
