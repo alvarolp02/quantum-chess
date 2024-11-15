@@ -1,8 +1,8 @@
-#include <iostream>
-#include <vector>
-
 #ifndef TILE_H
 #define TILE_H
+
+#include <iostream>
+#include <vector>
 
 std::vector<std::string> letters = {
     {"a", "b", "c", "d", "e", "f", "g", "h"}
@@ -18,9 +18,17 @@ struct Tile {
         return (row == other.row && col == other.col);
     }
 
-    void display() const {
+    std::string to_string(){
+        return letters[col] + std::to_string(8-row);
+    }
+};
 
-        std::cout << letters[col] << 8-row << std::endl;
+struct Split {
+    int depth;
+    Tile piece;
+
+    bool operator==(const Split& other) const {
+        return (depth == other.depth && piece == other.piece);
     }
 };
 

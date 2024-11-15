@@ -1,5 +1,7 @@
 #include "quantum_chess/interface.hpp"
 #include <thread>
+#include <sstream>
+#include <iomanip>
 
 Interface::Interface() {
     window.create(sf::VideoMode(TILE_SIZE * BOARD_SIZE, TILE_SIZE * BOARD_SIZE), "Tablero de Ajedrez");
@@ -11,8 +13,9 @@ void Interface::openWindow() {
     }
 }
 
-Tile Interface::waitForInput(){
+std::vector<Tile> Interface::waitForInput(){
     sf::Event event;
+    std::vector<Tile> movements;
     while (window.waitEvent(event)) {
         // Close window
         if (event.type == sf::Event::Closed)
@@ -24,10 +27,20 @@ Tile Interface::waitForInput(){
                 int x = event.mouseButton.y / TILE_SIZE; // Rows
                 int y = event.mouseButton.x / TILE_SIZE; // Columns
 
-                return Tile(x, y);
+                return {Tile(x, y)};
+            } else if (event.mouseButton.button == sf::Mouse::Right) {
+                int x = event.mouseButton.y / TILE_SIZE; // Rows
+                int y = event.mouseButton.x / TILE_SIZE; // Columns
+                if (movements.size() == 0) {
+                    movements.push_back(Tile(x, y));
+                } else if (movements.size() == 1) {
+                    movements.push_back(Tile(x, y));
+                    return movements;
+                }
             }
         }
     }
+    return {Tile(-1, -1)};
 }
 
 void Interface::loadBoard(){
@@ -45,6 +58,7 @@ void Interface::loadBoard(){
         }
     }
 }
+
 
 void Interface::loadPieces(Eigen::Matrix<int, 8, 8> board){
 
@@ -111,6 +125,39 @@ void Interface::loadPieces(Eigen::Matrix<int, 8, 8> board){
 
 }
 
+void Interface::loadPonderation(Eigen::Matrix<double, 8, 8> pond_board){
+    sf::Font font;
+    if (!font.loadFromFile("../assets/montserrat/Montserrat-Bold.otf")) {
+        std::cerr << "Error loading font." << std::endl;
+        return;
+    }
+
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        for (int j = 0; j < BOARD_SIZE; ++j) {
+            if (pond_board(i, j) == 0) {
+                continue;
+            }
+
+            double pond = pond_board(i, j);
+
+            sf::Text text;
+            text.setFont(font);
+            std::ostringstream out;
+            out << std::fixed << std::setprecision(2) << pond;
+            text.setString(out.str());
+            text.setCharacterSize(20);
+            text.setFillColor(sf::Color::Blue);
+            text.setPosition(j*TILE_SIZE + TILE_SIZE*3/4-20, i*TILE_SIZE + TILE_SIZE*3/4);
+            window.draw(text);
+
+            sf::RectangleShape tile(sf::Vector2f(TILE_SIZE*0.1, 0.9*TILE_SIZE*pond));
+            tile.setPosition(j*TILE_SIZE+TILE_SIZE*0.05, i*TILE_SIZE+TILE_SIZE*0.05);
+            tile.setFillColor(sf::Color::Blue);
+            window.draw(tile);
+        }
+    }
+}
+
 void Interface::loadMovements(std::vector<Tile> movements){
     sf::Color green(0, 255, 0);
 
@@ -124,3 +171,4 @@ void Interface::loadMovements(std::vector<Tile> movements){
         window.draw(tile);
     }
 }
+

@@ -1,3 +1,6 @@
+#ifndef BOARD_H
+#define BOARD_H
+
 #include <iostream>
 #include <Eigen/Dense>
 #include "structs.hpp"
@@ -48,3 +51,5 @@ class Board {
         // void setupPieces();
         // bool isValidMove(int startX, int startY, int endX, int endY) const;
 };
+
+#endif // BOARD_H
