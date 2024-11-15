@@ -75,6 +75,7 @@ void QCTree::collapse(Tile piece){
 
 }
 
+// Delete node and all its children
 void QCTree::delete_node(QCNode* node){
     if(node == nullptr){
         return;
@@ -108,51 +109,32 @@ std::vector<QCNode*> QCTree::get_nodes_at_depth_aux(QCNode* node, int depth, std
 }
 
 void QCTree::print_tree(){
-    print_tree_aux(this->root, "", false);
+    print_tree_aux(this->root, "");
     
     std::cout  << std::endl << std::endl;
 }
 
-void QCTree::print_tree_aux(QCNode* node, std::string prefix, bool split = false){
+void QCTree::print_tree_aux(QCNode* node, std::string prefix){
     if(node==nullptr){
         return;
     }
 
-    if(split){
-        std::cout << std::endl;
-        std::cout << prefix;
-        std::cout << "└─ ";
-        prefix += "    ";
-    } else {
-        std::cout << "── "; 
-        prefix += "    "; 
-    }
+    std::cout << std::endl;
+    std::cout << prefix;
+    std::cout << "└─ ";
+    prefix += "    ";
     std::cout << node->index;
 
-    print_tree_aux(node->left, prefix, true);
-    print_tree_aux(node->right, prefix, true);
+    print_tree_aux(node->left, prefix);
+    print_tree_aux(node->right, prefix);
     
 }
 
-std::vector<Eigen::Matrix<int, 8, 8>> QCTree::get_all_boards(){
-    std::vector<Eigen::Matrix<int, 8, 8>> boards = get_all_boards_aux(root, {});
-    return boards;
-}
-
-std::vector<Eigen::Matrix<int, 8, 8>> QCTree::get_all_boards_aux(QCNode* node, 
-                                                    std::vector<Eigen::Matrix<int, 8, 8>> acum){
-    if(node->left != nullptr && node->right != nullptr){
-        auto acum_aux = get_all_boards_aux(node->left, acum);
-        acum = get_all_boards_aux(node->right, acum_aux);
-    } else {
-        acum.push_back(node->board.board_matrix);
-    }
-
-    return acum;
-}
-
 void QCTree::get_ponderated_board(){
-    auto boards = get_all_boards();
+    std::vector<Eigen::Matrix<int, 8, 8>> boards = {};
+    for(auto node : get_nodes_at_depth(depth)){
+        boards.push_back(node->board.board_matrix);
+    }
     int n_boards = boards.size();
 
     pond_matrix = Eigen::Matrix<double, 8, 8>::Zero();

@@ -25,17 +25,12 @@ class QCTree {
         std::vector<Split> splits;
 
     private: 
-        void print_tree_aux(QCNode* node, std::string prefix, bool split);
+        void print_tree_aux(QCNode* node, std::string prefix);
 
         void delete_node(QCNode* node);
 
         std::vector<QCNode*> get_nodes_at_depth(int depth);
         std::vector<QCNode*> get_nodes_at_depth_aux(QCNode* node, int depth, std::vector<QCNode*> acum);
-
-        std::vector<Eigen::Matrix<int, 8, 8>> get_all_boards();
-
-        std::vector<Eigen::Matrix<int, 8, 8>> get_all_boards_aux(QCNode* node, 
-                                                            std::vector<Eigen::Matrix<int, 8, 8>> acum);
 
         QCNode* root;
 
