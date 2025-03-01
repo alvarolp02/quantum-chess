@@ -52,13 +52,16 @@ class QCTree {
         
         void collapse(Tile piece){
             std::cout << "Collapsing..." << std::endl;
+
+            // Randomly choose one of the children to collapse
+            bool random_boolean = std::rand()%2;
+            
             for (int i = 0; i < splits.size(); ++i) {
                 // Search the split related to the actual piece
                 if(splits[i].piece == piece){
                     // Collapse all nodes at depth of split
                     for (auto node : get_nodes_at_depth(this->splits[i].depth)){
                         // Delete one of the children randomly
-                        bool random_boolean = std::rand()%2;
                         if (random_boolean){
                             delete_node(node->right); 
                             node->index = node->left->index;
@@ -101,6 +104,8 @@ class QCTree {
             std::vector<Eigen::Matrix<int, 8, 8>> boards = {};
             for(auto node : get_nodes_at_depth(this->depth)){
                 boards.push_back(node->board.board_matrix);
+                std::cout << node->board.board_matrix << std::endl;
+                std::cout <<  "------------" << std::endl;
             }
             int n_boards = boards.size();
         
@@ -111,9 +116,9 @@ class QCTree {
                 for (int j = 0; j < 8; ++j) {
                     double sum = 0.0;
                     for (auto board : boards) {
-                        if (board(i, j) != 0) {
+                        if (board(i, j) != gap) {
                             sum+=1;
-                            if(q_board.board_matrix(i, j) == 0){
+                            if(q_board.board_matrix(i, j) == gap){
                                 q_board.board_matrix(i, j) = board(i, j);
                             } else if (q_board.board_matrix(i, j) != board(i, j)){
                                 std::cout << "Error: Different pieces in the same tile" << std::endl;
