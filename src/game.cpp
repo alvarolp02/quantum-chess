@@ -49,7 +49,7 @@ int main(int argc, char * argv[])
           Tile target = input;
 
           bool source_is_quantum = tree.pond_matrix(selectedPiece.row, selectedPiece.col) != 1.00;
-          bool target_occupied = tree.q_board.board_matrix(target.row, target.col) != 0;
+          bool target_occupied = tree.q_board.board_matrix(target.row, target.col) != gap;
           
           // If a quantum piece is used to capture an occupied tile, collapse the piece
           if(source_is_quantum && target_occupied){
@@ -97,8 +97,12 @@ int main(int argc, char * argv[])
         Tile target1 = inputs[0];
         Tile target2 = inputs[1];
 
-        bool target1_ok = std::find(movements.begin(), movements.end(), target1) != movements.end();
-        bool target2_ok = std::find(movements.begin(), movements.end(), target2) != movements.end();
+
+        // Check both movements are valid and the target tiles are empty
+        bool target1_ok = std::find(movements.begin(), movements.end(), target1) != movements.end() 
+                            && tree.q_board.board_matrix(target1.row, target1.col) == gap;
+        bool target2_ok = std::find(movements.begin(), movements.end(), target2) != movements.end()
+                            && tree.q_board.board_matrix(target2.row, target2.col) == gap;
 
         
         if (target1_ok && target2_ok && !(target1==target2)) {
