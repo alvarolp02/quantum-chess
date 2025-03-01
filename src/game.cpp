@@ -1,5 +1,5 @@
 #include "interface.cpp"
-#include "qc_tree.cpp"
+#include "quantum_chess/qc_tree.hpp"
 #include "quantum_chess/board.hpp"
 #include "quantum_chess/qc_node.hpp"
 #include <thread>
@@ -7,14 +7,14 @@
 
 void print_interface(Interface* interface, QCTree* tree){
   interface->loadBoard();
-  interface->loadPieces(tree->q_board.board_matrix_);
+  interface->loadPieces(tree->q_board.board_matrix);
   interface->loadPonderation(tree->pond_matrix);
   interface->window.display();
 }
 
 void print_interface(Interface* interface, QCTree* tree, std::vector<Tile> movements){
   interface->loadBoard();
-  interface->loadPieces(tree->q_board.board_matrix_);
+  interface->loadPieces(tree->q_board.board_matrix);
   interface->loadPonderation(tree->pond_matrix);
   interface->loadMovements(movements);
   interface->window.display();
@@ -49,7 +49,7 @@ int main(int argc, char * argv[])
           Tile target = input;
 
           bool source_is_quantum = tree.pond_matrix(selectedPiece.row, selectedPiece.col) != 1.00;
-          bool target_occupied = tree.q_board.board_matrix_(target.row, target.col) != gap;
+          bool target_occupied = tree.q_board.board_matrix(target.row, target.col) != gap;
           
           // If a quantum piece is used to capture an occupied tile, collapse the piece
           if(source_is_quantum && target_occupied){
@@ -57,7 +57,7 @@ int main(int argc, char * argv[])
             tree.get_ponderated_board();
 
             // If the piece is real, capture the target
-            if(tree.q_board.board_matrix_(selectedPiece.row, selectedPiece.col) != 0){
+            if(tree.q_board.board_matrix(selectedPiece.row, selectedPiece.col) != 0){
               tree.propagate(selectedPiece, target);
               std::cout<< "Move: "<<selectedPiece.to_string()<<" "<<target.to_string()<<std::endl;
             }
@@ -100,9 +100,9 @@ int main(int argc, char * argv[])
 
         // Check both movements are valid and the target tiles are empty
         bool target1_ok = std::find(movements.begin(), movements.end(), target1) != movements.end() 
-                            && tree.q_board.board_matrix_(target1.row, target1.col) == gap;
+                            && tree.q_board.board_matrix(target1.row, target1.col) == gap;
         bool target2_ok = std::find(movements.begin(), movements.end(), target2) != movements.end()
-                            && tree.q_board.board_matrix_(target2.row, target2.col) == gap;
+                            && tree.q_board.board_matrix(target2.row, target2.col) == gap;
 
         
         if (target1_ok && target2_ok && !(target1==target2)) {

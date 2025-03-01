@@ -23,12 +23,12 @@
 class Board {
     public:
 
-        Eigen::Matrix<int, 8, 8> board_matrix_;
+        Eigen::Matrix<int, 8, 8> board_matrix;
 
         Board() {
             // Initialize the board to be gap
-            board_matrix_ = Eigen::Matrix<int, 8, 8>::Zero();
-            board_matrix_ << b_rook,b_knight,b_bishop,b_queen,b_king,b_bishop,b_knight,b_rook,
+            board_matrix = Eigen::Matrix<int, 8, 8>::Zero();
+            board_matrix << b_rook,b_knight,b_bishop,b_queen,b_king,b_bishop,b_knight,b_rook,
                     b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,
                     gap,gap,gap,gap,gap,gap,gap,gap,
                     gap,gap,gap,gap,gap,gap,gap,gap,
@@ -39,26 +39,26 @@ class Board {
         }
         
         void movePiece(Tile source, Tile target) {
-            if(board_matrix_(source.row, source.col)!=gap){
-                board_matrix_(target.row, target.col) = board_matrix_(source.row, source.col);
-                board_matrix_(source.row, source.col) = gap;
+            if(board_matrix(source.row, source.col)!=gap){
+                board_matrix(target.row, target.col) = board_matrix(source.row, source.col);
+                board_matrix(source.row, source.col) = gap;
             }
         }
         
         void printBoard() {
-            std::cout << board_matrix_ << std::endl;
+            std::cout << board_matrix << std::endl;
         }
         
         bool isWhite(Tile t) {
-            return board_matrix_(t.row, t.col) < 7 && board_matrix_(t.row, t.col) != gap;
+            return board_matrix(t.row, t.col) < 7 && board_matrix(t.row, t.col) != gap;
         }
         
         bool isBlack(Tile t) {
-            return board_matrix_(t.row, t.col) >= 7;
+            return board_matrix(t.row, t.col) >= 7;
         }
         
         std::vector<Tile> getValidMoves(Tile t) {
-            int piece = board_matrix_(t.row, t.col);
+            int piece = board_matrix(t.row, t.col);
         
             switch (piece){
                 case w_pawn:
@@ -95,17 +95,17 @@ class Board {
         std::vector<Tile> getValidWhitePawnMoves(Tile t) {
             std::vector<Tile> validMoves;
             //Move
-            if (t.row == 6  && board_matrix_(t.row - 1, t.col) == gap && board_matrix_(t.row - 2, t.col) == gap) {
+            if (t.row == 6  && board_matrix(t.row - 1, t.col) == gap && board_matrix(t.row - 2, t.col) == gap) {
                 validMoves.push_back(Tile(t.row - 2, t.col));
             }
-            if (t.row > 0 && board_matrix_(t.row - 1, t.col) == gap){
+            if (t.row > 0 && board_matrix(t.row - 1, t.col) == gap){
                 validMoves.push_back(Tile(t.row - 1, t.col));
             }
             //Capture
-            if (t.row > 0 && t.col > 0 && board_matrix_(t.row - 1, t.col - 1) >= 7) {
+            if (t.row > 0 && t.col > 0 && board_matrix(t.row - 1, t.col - 1) >= 7) {
                 validMoves.push_back(Tile(t.row - 1, t.col - 1));
             }
-            if (t.row > 0 && t.col < 7 && board_matrix_(t.row - 1, t.col + 1) >= 7) {
+            if (t.row > 0 && t.col < 7 && board_matrix(t.row - 1, t.col + 1) >= 7) {
                 validMoves.push_back(Tile(t.row - 1, t.col + 1));
             }
         
@@ -116,9 +116,9 @@ class Board {
             std::vector<Tile> validMoves;
         
             for (int i = t.row - 1; i >= 0; i--) {
-                if (board_matrix_(i, t.col) == gap) {
+                if (board_matrix(i, t.col) == gap) {
                     validMoves.push_back(Tile(i, t.col));
-                } else if (board_matrix_(i, t.col) >= 7) {
+                } else if (board_matrix(i, t.col) >= 7) {
                     validMoves.push_back(Tile(i, t.col));
                     break;
                 } else {
@@ -126,9 +126,9 @@ class Board {
                 }
             }
             for (int i = t.row + 1; i < 8; i++) {
-                if (board_matrix_(i, t.col) == gap) {
+                if (board_matrix(i, t.col) == gap) {
                     validMoves.push_back(Tile(i, t.col));
-                } else if(board_matrix_(i, t.col) >= 7) {
+                } else if(board_matrix(i, t.col) >= 7) {
                     validMoves.push_back(Tile(i, t.col));
                     break;
                 } else {
@@ -136,9 +136,9 @@ class Board {
                 }
             }
             for (int i = t.col - 1; i >= 0; i--) {
-                if (board_matrix_(t.row, i) == gap) {
+                if (board_matrix(t.row, i) == gap) {
                     validMoves.push_back(Tile(t.row, i));
-                } else if(board_matrix_(t.row, i) >= 7) {
+                } else if(board_matrix(t.row, i) >= 7) {
                     validMoves.push_back(Tile(i, t.col));
                     break;
                 } else {
@@ -146,9 +146,9 @@ class Board {
                 }
             }
             for (int i = t.col + 1; i < 8; i++) {
-                if (board_matrix_(t.row, i) == gap) {
+                if (board_matrix(t.row, i) == gap) {
                     validMoves.push_back(Tile(t.row, i));
-                } else if(board_matrix_(t.row, i) >= 7) {
+                } else if(board_matrix(t.row, i) >= 7) {
                     validMoves.push_back(Tile(i, t.col));
                     break;
                 } else {
@@ -162,44 +162,44 @@ class Board {
         std::vector<Tile> getValidWhiteKnightMoves(Tile t) {
             std::vector<Tile> validMoves;
         
-            if(t.row-2 >= 0 && t.col-1 >= 0 && board_matrix_(t.row-2, t.col-1) == gap) {
+            if(t.row-2 >= 0 && t.col-1 >= 0 && board_matrix(t.row-2, t.col-1) == gap) {
                 validMoves.push_back(Tile(t.row-2, t.col-1));
-            } else if (t.row-2 >= 0 && t.col-1 >= 0 && board_matrix_(t.row-2, t.col-1) >= 7) {
+            } else if (t.row-2 >= 0 && t.col-1 >= 0 && board_matrix(t.row-2, t.col-1) >= 7) {
                 validMoves.push_back(Tile(t.row-2, t.col-1));
             }
-            if(t.row-2 >= 0 && t.col+1 < 8 && board_matrix_(t.row-2, t.col+1) == gap) {
+            if(t.row-2 >= 0 && t.col+1 < 8 && board_matrix(t.row-2, t.col+1) == gap) {
                 validMoves.push_back(Tile(t.row-2, t.col+1));
-            } else if (t.row-2 >= 0 && t.col+1 < 8 && board_matrix_(t.row-2, t.col+1) >= 7) {
+            } else if (t.row-2 >= 0 && t.col+1 < 8 && board_matrix(t.row-2, t.col+1) >= 7) {
                 validMoves.push_back(Tile(t.row-2, t.col+1));
             }
-            if(t.row-1 >= 0 && t.col-2 >= 0 && board_matrix_(t.row-1, t.col-2) == gap) {
+            if(t.row-1 >= 0 && t.col-2 >= 0 && board_matrix(t.row-1, t.col-2) == gap) {
                 validMoves.push_back(Tile(t.row-1, t.col-2));
-            } else if (t.row-1 >= 0 && t.col-2 >= 0 && board_matrix_(t.row-1, t.col-2) >= 7) {
+            } else if (t.row-1 >= 0 && t.col-2 >= 0 && board_matrix(t.row-1, t.col-2) >= 7) {
                 validMoves.push_back(Tile(t.row-1, t.col-2));
             }
-            if(t.row-1 >= 0 && t.col+2 < 8 && board_matrix_(t.row-1, t.col+2) == gap) {
+            if(t.row-1 >= 0 && t.col+2 < 8 && board_matrix(t.row-1, t.col+2) == gap) {
                 validMoves.push_back(Tile(t.row-1, t.col+2));
-            } else if (t.row-1 >= 0 && t.col+2 < 8 && board_matrix_(t.row-1, t.col+2) >= 7) {
+            } else if (t.row-1 >= 0 && t.col+2 < 8 && board_matrix(t.row-1, t.col+2) >= 7) {
                 validMoves.push_back(Tile(t.row-1, t.col+2));
             }
-            if(t.row+1 < 8 && t.col-2 >= 0 && board_matrix_(t.row+1, t.col-2) == gap) {
+            if(t.row+1 < 8 && t.col-2 >= 0 && board_matrix(t.row+1, t.col-2) == gap) {
                 validMoves.push_back(Tile(t.row+1, t.col-2));
-            } else if (t.row+1 < 8 && t.col-2 >= 0 && board_matrix_(t.row+1, t.col-2) >= 7) {
+            } else if (t.row+1 < 8 && t.col-2 >= 0 && board_matrix(t.row+1, t.col-2) >= 7) {
                 validMoves.push_back(Tile(t.row+1, t.col-2));
             }
-            if(t.row+1 < 8 && t.col+2 < 8 && board_matrix_(t.row+1, t.col+2) == gap) {
+            if(t.row+1 < 8 && t.col+2 < 8 && board_matrix(t.row+1, t.col+2) == gap) {
                 validMoves.push_back(Tile(t.row+1, t.col+2));
-            } else if (t.row+1 < 8 && t.col+2 < 8 && board_matrix_(t.row+1, t.col+2) >= 7) {
+            } else if (t.row+1 < 8 && t.col+2 < 8 && board_matrix(t.row+1, t.col+2) >= 7) {
                 validMoves.push_back(Tile(t.row+1, t.col+2));
             }
-            if(t.row+2 < 8 && t.col-1 >= 0 && board_matrix_(t.row+2, t.col-1) == gap) {
+            if(t.row+2 < 8 && t.col-1 >= 0 && board_matrix(t.row+2, t.col-1) == gap) {
                 validMoves.push_back(Tile(t.row+2, t.col-1));
-            } else if (t.row+2 < 8 && t.col-1 >= 0 && board_matrix_(t.row+2, t.col-1) >= 7) {
+            } else if (t.row+2 < 8 && t.col-1 >= 0 && board_matrix(t.row+2, t.col-1) >= 7) {
                 validMoves.push_back(Tile(t.row+2, t.col-1));
             }
-            if(t.row+2 < 8 && t.col+1 < 8 && board_matrix_(t.row+2, t.col+1) == gap) {
+            if(t.row+2 < 8 && t.col+1 < 8 && board_matrix(t.row+2, t.col+1) == gap) {
                 validMoves.push_back(Tile(t.row+2, t.col+1));
-            } else if (t.row+2 < 8 && t.col+1 < 8 && board_matrix_(t.row+2, t.col+1) >= 7) {
+            } else if (t.row+2 < 8 && t.col+1 < 8 && board_matrix(t.row+2, t.col+1) >= 7) {
                 validMoves.push_back(Tile(t.row+2, t.col+1));
             }
         
@@ -210,9 +210,9 @@ class Board {
             std::vector<Tile> validMoves;
         
             for (int i = 1; t.row - i >= 0 && t.col - i >= 0; i++) {
-                if (board_matrix_(t.row - i, t.col - i) == gap) {
+                if (board_matrix(t.row - i, t.col - i) == gap) {
                     validMoves.push_back(Tile(t.row - i, t.col - i));
-                } else if (board_matrix_(t.row - i, t.col - i) >= 7) {
+                } else if (board_matrix(t.row - i, t.col - i) >= 7) {
                     validMoves.push_back(Tile(t.row - i, t.col - i));
                     break;
                 } else {
@@ -220,9 +220,9 @@ class Board {
                 }
             }
             for (int i = 1; t.row - i >= 0 && t.col + i < 8; i++) {
-                if (board_matrix_(t.row - i, t.col + i) == gap) {
+                if (board_matrix(t.row - i, t.col + i) == gap) {
                     validMoves.push_back(Tile(t.row - i, t.col + i));
-                } else if (board_matrix_(t.row - i, t.col + i) >= 7) {
+                } else if (board_matrix(t.row - i, t.col + i) >= 7) {
                     validMoves.push_back(Tile(t.row - i, t.col + i));
                     break;
                 } else {
@@ -230,9 +230,9 @@ class Board {
                 }
             }
             for (int i = 1; t.row + i < 8 && t.col - i >= 0; i++) {
-                if (board_matrix_(t.row + i, t.col - i) == gap) {
+                if (board_matrix(t.row + i, t.col - i) == gap) {
                     validMoves.push_back(Tile(t.row + i, t.col - i));
-                } else if (board_matrix_(t.row + i, t.col - i) >= 7) {
+                } else if (board_matrix(t.row + i, t.col - i) >= 7) {
                     validMoves.push_back(Tile(t.row + i, t.col - i));
                     break;
                 } else {
@@ -240,9 +240,9 @@ class Board {
                 }
             }
             for (int i = 1; t.row + i < 8 && t.col + i < 8; i++) {
-                if (board_matrix_(t.row + i, t.col + i) == gap) {
+                if (board_matrix(t.row + i, t.col + i) == gap) {
                     validMoves.push_back(Tile(t.row + i, t.col + i));
-                } else if (board_matrix_(t.row + i, t.col + i) >= 7) {
+                } else if (board_matrix(t.row + i, t.col + i) >= 7) {
                     validMoves.push_back(Tile(t.row + i, t.col + i));
                     break;
                 } else {
@@ -265,44 +265,44 @@ class Board {
         std::vector<Tile> getValidWhiteKingMoves(Tile t) {
             std::vector<Tile> validMoves;
         
-            if(t.row-1 >= 0 && t.col-1 >= 0 && board_matrix_(t.row-1, t.col-1) == gap) {
+            if(t.row-1 >= 0 && t.col-1 >= 0 && board_matrix(t.row-1, t.col-1) == gap) {
                 validMoves.push_back(Tile(t.row-1, t.col-1));
-            } else if (t.row-1 >= 0 && t.col-1 >= 0 && board_matrix_(t.row-1, t.col-1) >= 7) {
+            } else if (t.row-1 >= 0 && t.col-1 >= 0 && board_matrix(t.row-1, t.col-1) >= 7) {
                 validMoves.push_back(Tile(t.row-1, t.col-1));
             }
-            if(t.row-1 >= 0 && board_matrix_(t.row-1, t.col) == gap) {
+            if(t.row-1 >= 0 && board_matrix(t.row-1, t.col) == gap) {
                 validMoves.push_back(Tile(t.row-1, t.col));
-            } else if (t.row-1 >= 0 && board_matrix_(t.row-1, t.col) >= 7) {
+            } else if (t.row-1 >= 0 && board_matrix(t.row-1, t.col) >= 7) {
                 validMoves.push_back(Tile(t.row-1, t.col));
             }
-            if(t.row-1 >= 0 && t.col+1 < 8 && board_matrix_(t.row-1, t.col+1) == gap) {
+            if(t.row-1 >= 0 && t.col+1 < 8 && board_matrix(t.row-1, t.col+1) == gap) {
                 validMoves.push_back(Tile(t.row-1, t.col+1));
-            } else if (t.row-1 >= 0 && t.col+1 < 8 && board_matrix_(t.row-1, t.col+1) >= 7) {
+            } else if (t.row-1 >= 0 && t.col+1 < 8 && board_matrix(t.row-1, t.col+1) >= 7) {
                 validMoves.push_back(Tile(t.row-1, t.col+1));
             }
-            if(t.col-1 >= 0 && board_matrix_(t.row, t.col-1) == gap) {
+            if(t.col-1 >= 0 && board_matrix(t.row, t.col-1) == gap) {
                 validMoves.push_back(Tile(t.row, t.col-1));
-            } else if (t.col-1 >= 0 && board_matrix_(t.row, t.col-1) >= 7) {
+            } else if (t.col-1 >= 0 && board_matrix(t.row, t.col-1) >= 7) {
                 validMoves.push_back(Tile(t.row, t.col-1));
             }
-            if(t.col+1 < 8 && board_matrix_(t.row, t.col+1) == gap) {
+            if(t.col+1 < 8 && board_matrix(t.row, t.col+1) == gap) {
                 validMoves.push_back(Tile(t.row, t.col+1));
-            } else if (t.col+1 < 8 && board_matrix_(t.row, t.col+1) >= 7) {
+            } else if (t.col+1 < 8 && board_matrix(t.row, t.col+1) >= 7) {
                 validMoves.push_back(Tile(t.row, t.col+1));
             }
-            if(t.row+1 < 8 && t.col-1 >= 0 && board_matrix_(t.row+1, t.col-1) == gap) {
+            if(t.row+1 < 8 && t.col-1 >= 0 && board_matrix(t.row+1, t.col-1) == gap) {
                 validMoves.push_back(Tile(t.row+1, t.col-1));
-            } else if (t.row+1 < 8 && t.col-1 >= 0 && board_matrix_(t.row+1, t.col-1) >= 7) {
+            } else if (t.row+1 < 8 && t.col-1 >= 0 && board_matrix(t.row+1, t.col-1) >= 7) {
                 validMoves.push_back(Tile(t.row+1, t.col-1));
             }
-            if(t.row+1 < 8 && board_matrix_(t.row+1, t.col) == gap) {
+            if(t.row+1 < 8 && board_matrix(t.row+1, t.col) == gap) {
                 validMoves.push_back(Tile(t.row+1, t.col));
-            } else if (t.row+1 < 8 && board_matrix_(t.row+1, t.col) >= 7) {
+            } else if (t.row+1 < 8 && board_matrix(t.row+1, t.col) >= 7) {
                 validMoves.push_back(Tile(t.row+1, t.col));
             }
-            if(t.row+1 < 8 && t.col+1 < 8 && board_matrix_(t.row+1, t.col+1) == gap) {
+            if(t.row+1 < 8 && t.col+1 < 8 && board_matrix(t.row+1, t.col+1) == gap) {
                 validMoves.push_back(Tile(t.row+1, t.col+1));
-            } else if (t.row+1 < 8 && t.col+1 < 8 && board_matrix_(t.row+1, t.col+1) >= 7) {
+            } else if (t.row+1 < 8 && t.col+1 < 8 && board_matrix(t.row+1, t.col+1) >= 7) {
                 validMoves.push_back(Tile(t.row+1, t.col+1));
             }
         
@@ -314,17 +314,17 @@ class Board {
             std::vector<Tile> validMoves;
         
             //Move
-            if (t.row == 1  && board_matrix_(t.row + 1, t.col) == gap && board_matrix_(t.row + 2, t.col) == gap) {
+            if (t.row == 1  && board_matrix(t.row + 1, t.col) == gap && board_matrix(t.row + 2, t.col) == gap) {
                 validMoves.push_back(Tile(t.row + 2, t.col));
             }
-            if (t.row < 7 && board_matrix_(t.row + 1, t.col) == gap){
+            if (t.row < 7 && board_matrix(t.row + 1, t.col) == gap){
                 validMoves.push_back(Tile(t.row + 1, t.col));
             }
             //Capture
-            if (t.row < 7 && t.col > 0 && board_matrix_(t.row + 1, t.col - 1) < 7 && board_matrix_(t.row + 1, t.col - 1) != gap) {
+            if (t.row < 7 && t.col > 0 && board_matrix(t.row + 1, t.col - 1) < 7 && board_matrix(t.row + 1, t.col - 1) != gap) {
                 validMoves.push_back(Tile(t.row + 1, t.col - 1));
             }
-            if (t.row < 7 && t.col < 7 && board_matrix_(t.row + 1, t.col + 1) < 7 && board_matrix_(t.row + 1, t.col + 1) != gap) {
+            if (t.row < 7 && t.col < 7 && board_matrix(t.row + 1, t.col + 1) < 7 && board_matrix(t.row + 1, t.col + 1) != gap) {
                 validMoves.push_back(Tile(t.row + 1, t.col + 1));
             }
             
@@ -335,9 +335,9 @@ class Board {
             std::vector<Tile> validMoves;
         
             for (int i = t.row - 1; i >= 0; i--) {
-                if (board_matrix_(i, t.col) == gap) {
+                if (board_matrix(i, t.col) == gap) {
                     validMoves.push_back(Tile(i, t.col));
-                } else if (board_matrix_(i, t.col) < 7) {
+                } else if (board_matrix(i, t.col) < 7) {
                     validMoves.push_back(Tile(i, t.col));
                     break;
                 } else {
@@ -345,9 +345,9 @@ class Board {
                 }
             }
             for (int i = t.row + 1; i < 8; i++) {
-                if (board_matrix_(i, t.col) == gap) {
+                if (board_matrix(i, t.col) == gap) {
                     validMoves.push_back(Tile(i, t.col));
-                } else if(board_matrix_(i, t.col) < 7) {
+                } else if(board_matrix(i, t.col) < 7) {
                     validMoves.push_back(Tile(i, t.col));
                     break;
                 } else {
@@ -355,9 +355,9 @@ class Board {
                 }
             }
             for (int i = t.col - 1; i >= 0; i--) {
-                if (board_matrix_(t.row, i) == gap) {
+                if (board_matrix(t.row, i) == gap) {
                     validMoves.push_back(Tile(t.row, i));
-                } else if(board_matrix_(t.row, i) < 7) {
+                } else if(board_matrix(t.row, i) < 7) {
                     validMoves.push_back(Tile(t.row, i));
                     break;
                 } else {
@@ -365,9 +365,9 @@ class Board {
                 }
             }
             for (int i = t.col + 1; i < 8; i++) {
-                if (board_matrix_(t.row, i) == gap) {
+                if (board_matrix(t.row, i) == gap) {
                     validMoves.push_back(Tile(t.row, i));
-                } else if(board_matrix_(t.row, i) < 7) {
+                } else if(board_matrix(t.row, i) < 7) {
                     validMoves.push_back(Tile(t.row, i));
                     break;
                 } else {
@@ -381,44 +381,44 @@ class Board {
         std::vector<Tile> getValidBlackKnightMoves(Tile t) {
             std::vector<Tile> validMoves;
         
-            if(t.row-2 >= 0 && t.col-1 >= 0 && board_matrix_(t.row-2, t.col-1) == gap) {
+            if(t.row-2 >= 0 && t.col-1 >= 0 && board_matrix(t.row-2, t.col-1) == gap) {
                 validMoves.push_back(Tile(t.row-2, t.col-1));
-            } else if (t.row-2 >= 0 && t.col-1 >= 0 && board_matrix_(t.row-2, t.col-1) < 7) {
+            } else if (t.row-2 >= 0 && t.col-1 >= 0 && board_matrix(t.row-2, t.col-1) < 7) {
                 validMoves.push_back(Tile(t.row-2, t.col-1));
             }
-            if(t.row-2 >= 0 && t.col+1 < 8 && board_matrix_(t.row-2, t.col+1) == gap) {
+            if(t.row-2 >= 0 && t.col+1 < 8 && board_matrix(t.row-2, t.col+1) == gap) {
                 validMoves.push_back(Tile(t.row-2, t.col+1));
-            } else if (t.row-2 >= 0 && t.col+1 < 8 && board_matrix_(t.row-2, t.col+1) < 7) {
+            } else if (t.row-2 >= 0 && t.col+1 < 8 && board_matrix(t.row-2, t.col+1) < 7) {
                 validMoves.push_back(Tile(t.row-2, t.col+1));
             }
-            if(t.row-1 >= 0 && t.col-2 >= 0 && board_matrix_(t.row-1, t.col-2) == gap) {
+            if(t.row-1 >= 0 && t.col-2 >= 0 && board_matrix(t.row-1, t.col-2) == gap) {
                 validMoves.push_back(Tile(t.row-1, t.col-2));
-            } else if (t.row-1 >= 0 && t.col-2 >= 0 && board_matrix_(t.row-1, t.col-2) < 7) {
+            } else if (t.row-1 >= 0 && t.col-2 >= 0 && board_matrix(t.row-1, t.col-2) < 7) {
                 validMoves.push_back(Tile(t.row-1, t.col-2));
             }
-            if(t.row-1 >= 0 && t.col+2 < 8 && board_matrix_(t.row-1, t.col+2) == gap) {
+            if(t.row-1 >= 0 && t.col+2 < 8 && board_matrix(t.row-1, t.col+2) == gap) {
                 validMoves.push_back(Tile(t.row-1, t.col+2));
-            } else if (t.row-1 >= 0 && t.col+2 < 8 && board_matrix_(t.row-1, t.col+2) < 7) {
+            } else if (t.row-1 >= 0 && t.col+2 < 8 && board_matrix(t.row-1, t.col+2) < 7) {
                 validMoves.push_back(Tile(t.row-1, t.col+2));
             }
-            if(t.row+1 < 8 && t.col-2 >= 0 && board_matrix_(t.row+1, t.col-2) == gap) {
+            if(t.row+1 < 8 && t.col-2 >= 0 && board_matrix(t.row+1, t.col-2) == gap) {
                 validMoves.push_back(Tile(t.row+1, t.col-2));
-            } else if (t.row+1 < 8 && t.col-2 >= 0 && board_matrix_(t.row+1, t.col-2) < 7) {
+            } else if (t.row+1 < 8 && t.col-2 >= 0 && board_matrix(t.row+1, t.col-2) < 7) {
                 validMoves.push_back(Tile(t.row+1, t.col-2));
             }
-            if(t.row+1 < 8 && t.col+2 < 8 && board_matrix_(t.row+1, t.col+2) == gap) {
+            if(t.row+1 < 8 && t.col+2 < 8 && board_matrix(t.row+1, t.col+2) == gap) {
                 validMoves.push_back(Tile(t.row+1, t.col+2));
-            } else if (t.row+1 < 8 && t.col+2 < 8 && board_matrix_(t.row+1, t.col+2) < 7) {
+            } else if (t.row+1 < 8 && t.col+2 < 8 && board_matrix(t.row+1, t.col+2) < 7) {
                 validMoves.push_back(Tile(t.row+1, t.col+2));
             }
-            if(t.row+2 < 8 && t.col-1 >= 0 && board_matrix_(t.row+2, t.col-1) == gap) {
+            if(t.row+2 < 8 && t.col-1 >= 0 && board_matrix(t.row+2, t.col-1) == gap) {
                 validMoves.push_back(Tile(t.row+2, t.col-1));
-            } else if (t.row+2 < 8 && t.col-1 >= 0 && board_matrix_(t.row+2, t.col-1) < 7) {
+            } else if (t.row+2 < 8 && t.col-1 >= 0 && board_matrix(t.row+2, t.col-1) < 7) {
                 validMoves.push_back(Tile(t.row+2, t.col-1));
             }
-            if(t.row+2 < 8 && t.col+1 < 8 && board_matrix_(t.row+2, t.col+1) == gap) {
+            if(t.row+2 < 8 && t.col+1 < 8 && board_matrix(t.row+2, t.col+1) == gap) {
                 validMoves.push_back(Tile(t.row+2, t.col+1));
-            } else if (t.row+2 < 8 && t.col+1 < 8 && board_matrix_(t.row+2, t.col+1) < 7) {
+            } else if (t.row+2 < 8 && t.col+1 < 8 && board_matrix(t.row+2, t.col+1) < 7) {
                 validMoves.push_back(Tile(t.row+2, t.col+1));
             }
         
@@ -429,9 +429,9 @@ class Board {
             std::vector<Tile> validMoves;
         
             for (int i = 1; t.row - i >= 0 && t.col - i >= 0; i++) {
-                if (board_matrix_(t.row - i, t.col - i) == gap) {
+                if (board_matrix(t.row - i, t.col - i) == gap) {
                     validMoves.push_back(Tile(t.row - i, t.col - i));
-                } else if (board_matrix_(t.row - i, t.col - i) < 7) {
+                } else if (board_matrix(t.row - i, t.col - i) < 7) {
                     validMoves.push_back(Tile(t.row - i, t.col - i));
                     break;
                 } else {
@@ -439,9 +439,9 @@ class Board {
                 }
             }
             for (int i = 1; t.row - i >= 0 && t.col + i < 8; i++) {
-                if (board_matrix_(t.row - i, t.col + i) == gap) {
+                if (board_matrix(t.row - i, t.col + i) == gap) {
                     validMoves.push_back(Tile(t.row - i, t.col + i));
-                } else if (board_matrix_(t.row - i, t.col + i) < 7) {
+                } else if (board_matrix(t.row - i, t.col + i) < 7) {
                     validMoves.push_back(Tile(t.row - i, t.col + i));
                     break;
                 } else {
@@ -449,9 +449,9 @@ class Board {
                 }
             }
             for (int i = 1; t.row + i < 8 && t.col - i >= 0; i++) {
-                if (board_matrix_(t.row + i, t.col - i) == gap) {
+                if (board_matrix(t.row + i, t.col - i) == gap) {
                     validMoves.push_back(Tile(t.row + i, t.col - i));
-                } else if (board_matrix_(t.row + i, t.col - i) < 7) {
+                } else if (board_matrix(t.row + i, t.col - i) < 7) {
                     validMoves.push_back(Tile(t.row + i, t.col - i));
                     break;
                 } else {
@@ -459,9 +459,9 @@ class Board {
                 }
             }
             for (int i = 1; t.row + i < 8 && t.col + i < 8; i++) {
-                if (board_matrix_(t.row + i, t.col + i) == gap) {
+                if (board_matrix(t.row + i, t.col + i) == gap) {
                     validMoves.push_back(Tile(t.row + i, t.col + i));
-                } else if (board_matrix_(t.row + i, t.col + i) < 7) {
+                } else if (board_matrix(t.row + i, t.col + i) < 7) {
                     validMoves.push_back(Tile(t.row + i, t.col + i));
                     break;
                 } else {
@@ -484,44 +484,44 @@ class Board {
         std::vector<Tile> getValidBlackKingMoves(Tile t) {
             std::vector<Tile> validMoves;
         
-            if(t.row-1 >= 0 && t.col-1 >= 0 && board_matrix_(t.row-1, t.col-1) == gap) {
+            if(t.row-1 >= 0 && t.col-1 >= 0 && board_matrix(t.row-1, t.col-1) == gap) {
                 validMoves.push_back(Tile(t.row-1, t.col-1));
-            } else if (t.row-1 >= 0 && t.col-1 >= 0 && board_matrix_(t.row-1, t.col-1) < 7) {
+            } else if (t.row-1 >= 0 && t.col-1 >= 0 && board_matrix(t.row-1, t.col-1) < 7) {
                 validMoves.push_back(Tile(t.row-1, t.col-1));
             }
-            if(t.row-1 >= 0 && board_matrix_(t.row-1, t.col) == gap) {
+            if(t.row-1 >= 0 && board_matrix(t.row-1, t.col) == gap) {
                 validMoves.push_back(Tile(t.row-1, t.col));
-            } else if (t.row-1 >= 0 && board_matrix_(t.row-1, t.col) < 7) {
+            } else if (t.row-1 >= 0 && board_matrix(t.row-1, t.col) < 7) {
                 validMoves.push_back(Tile(t.row-1, t.col));
             }
-            if(t.row-1 >= 0 && t.col+1 < 8 && board_matrix_(t.row-1, t.col+1) == gap) {
+            if(t.row-1 >= 0 && t.col+1 < 8 && board_matrix(t.row-1, t.col+1) == gap) {
                 validMoves.push_back(Tile(t.row-1, t.col+1));
-            } else if (t.row-1 >= 0 && t.col+1 < 8 && board_matrix_(t.row-1, t.col+1) < 7) {
+            } else if (t.row-1 >= 0 && t.col+1 < 8 && board_matrix(t.row-1, t.col+1) < 7) {
                 validMoves.push_back(Tile(t.row-1, t.col+1));
             }
-            if(t.col-1 >= 0 && board_matrix_(t.row, t.col-1) == gap) {
+            if(t.col-1 >= 0 && board_matrix(t.row, t.col-1) == gap) {
                 validMoves.push_back(Tile(t.row, t.col-1));
-            } else if (t.col-1 >= 0 && board_matrix_(t.row, t.col-1) < 7) {
+            } else if (t.col-1 >= 0 && board_matrix(t.row, t.col-1) < 7) {
                 validMoves.push_back(Tile(t.row, t.col-1));
             }
-            if(t.col+1 < 8 && board_matrix_(t.row, t.col+1) == gap) {
+            if(t.col+1 < 8 && board_matrix(t.row, t.col+1) == gap) {
                 validMoves.push_back(Tile(t.row, t.col+1));
-            } else if (t.col+1 < 8 && board_matrix_(t.row, t.col+1) < 7) {
+            } else if (t.col+1 < 8 && board_matrix(t.row, t.col+1) < 7) {
                 validMoves.push_back(Tile(t.row, t.col+1));
             }
-            if(t.row+1 < 8 && t.col-1 >= 0 && board_matrix_(t.row+1, t.col-1) == gap) {
+            if(t.row+1 < 8 && t.col-1 >= 0 && board_matrix(t.row+1, t.col-1) == gap) {
                 validMoves.push_back(Tile(t.row+1, t.col-1));
-            } else if (t.row+1 < 8 && t.col-1 >= 0 && board_matrix_(t.row+1, t.col-1) < 7) {
+            } else if (t.row+1 < 8 && t.col-1 >= 0 && board_matrix(t.row+1, t.col-1) < 7) {
                 validMoves.push_back(Tile(t.row+1, t.col-1));
             }
-            if(t.row+1 < 8 && board_matrix_(t.row+1, t.col) == gap) {
+            if(t.row+1 < 8 && board_matrix(t.row+1, t.col) == gap) {
                 validMoves.push_back(Tile(t.row+1, t.col));
-            } else if (t.row+1 < 8 && board_matrix_(t.row+1, t.col) < 7) {
+            } else if (t.row+1 < 8 && board_matrix(t.row+1, t.col) < 7) {
                 validMoves.push_back(Tile(t.row+1, t.col));
             }
-            if(t.row+1 < 8 && t.col+1 < 8 && board_matrix_(t.row+1, t.col+1) == gap) {
+            if(t.row+1 < 8 && t.col+1 < 8 && board_matrix(t.row+1, t.col+1) == gap) {
                 validMoves.push_back(Tile(t.row+1, t.col+1));
-            } else if (t.row+1 < 8 && t.col+1 < 8 && board_matrix_(t.row+1, t.col+1) < 7) {
+            } else if (t.row+1 < 8 && t.col+1 < 8 && board_matrix(t.row+1, t.col+1) < 7) {
                 validMoves.push_back(Tile(t.row+1, t.col+1));
             }
         
