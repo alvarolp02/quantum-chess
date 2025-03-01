@@ -1,7 +1,7 @@
 #include "interface.cpp"
 #include "qc_tree.cpp"
 #include "quantum_chess/board.hpp"
-#include "qc_node.cpp"
+#include "quantum_chess/qc_node.hpp"
 #include <thread>
 #include <random>
 

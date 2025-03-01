@@ -47,17 +47,17 @@ void QCTree::collapse(Tile piece){
                 // Delete one of the children randomly
                 bool random_boolean = dist(gen);
                 if (random_boolean){
-                    delete_node(node->right); 
-                    node->index = node->left->index;
-                    node->board = node->left->board;
-                    node->right = node->left->right;
-                    node->left = node->left->left;
+                    delete_node(node->right_); 
+                    node->index_ = node->left_->index_;
+                    node->board_ = node->left_->board_;
+                    node->right_ = node->left_->right_;
+                    node->left_ = node->left_->left_;
                 }else{
-                    delete_node(node->left); 
-                    node->index = node->right->index;
-                    node->board = node->right->board;
-                    node->left = node->right->left;
-                    node->right = node->right->right;
+                    delete_node(node->left_); 
+                    node->index_ = node->right_->index_;
+                    node->board_ = node->right_->board_;
+                    node->left_ = node->right_->left_;
+                    node->right_ = node->right_->right_;
                 }
             }
             
@@ -80,8 +80,8 @@ void QCTree::delete_node(QCNode* node){
     if(node == nullptr){
         return;
     }
-    delete_node(node->left);
-    delete_node(node->right);
+    delete_node(node->left_);
+    delete_node(node->right_);
     
     delete node;
 }
@@ -96,13 +96,13 @@ std::vector<QCNode*> QCTree::get_nodes_at_depth_aux(QCNode* node, int depth, std
         return acum;
     }
 
-    if(node->index == depth){
+    if(node->index_ == depth){
         acum.push_back(node);
     }
 
-    if(node->left != nullptr && node->right != nullptr){
-        auto acum_aux = get_nodes_at_depth_aux(node->left, depth, acum);
-        acum = get_nodes_at_depth_aux(node->right, depth, acum_aux);
+    if(node->left_ != nullptr && node->right_ != nullptr){
+        auto acum_aux = get_nodes_at_depth_aux(node->left_, depth, acum);
+        acum = get_nodes_at_depth_aux(node->right_, depth, acum_aux);
     }
 
     return acum;
@@ -123,17 +123,17 @@ void QCTree::print_tree_aux(QCNode* node, std::string prefix){
     std::cout << prefix;
     std::cout << "└─ ";
     prefix += "    ";
-    std::cout << node->index;
+    std::cout << node->index_;
 
-    print_tree_aux(node->left, prefix);
-    print_tree_aux(node->right, prefix);
+    print_tree_aux(node->left_, prefix);
+    print_tree_aux(node->right_, prefix);
     
 }
 
 void QCTree::get_ponderated_board(){
     std::vector<Eigen::Matrix<int, 8, 8>> boards = {};
     for(auto node : get_nodes_at_depth(depth)){
-        boards.push_back(node->board.board_matrix_);
+        boards.push_back(node->board_.board_matrix_);
     }
     int n_boards = boards.size();
 
