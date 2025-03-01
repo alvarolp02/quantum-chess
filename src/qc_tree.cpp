@@ -133,12 +133,12 @@ void QCTree::print_tree_aux(QCNode* node, std::string prefix){
 void QCTree::get_ponderated_board(){
     std::vector<Eigen::Matrix<int, 8, 8>> boards = {};
     for(auto node : get_nodes_at_depth(depth)){
-        boards.push_back(node->board.board_matrix);
+        boards.push_back(node->board.board_matrix_);
     }
     int n_boards = boards.size();
 
     pond_matrix = Eigen::Matrix<double, 8, 8>::Zero();
-    q_board.board_matrix = Eigen::Matrix<int, 8, 8>::Zero();
+    q_board.board_matrix_ = Eigen::Matrix<int, 8, 8>::Zero();
 
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < 8; ++j) {
@@ -146,9 +146,9 @@ void QCTree::get_ponderated_board(){
             for (auto board : boards) {
                 if (board(i, j) != 0) {
                     sum+=1;
-                    if(q_board.board_matrix(i, j) == 0){
-                        q_board.board_matrix(i, j) = board(i, j);
-                    } else if (q_board.board_matrix(i, j) != board(i, j)){
+                    if(q_board.board_matrix_(i, j) == 0){
+                        q_board.board_matrix_(i, j) = board(i, j);
+                    } else if (q_board.board_matrix_(i, j) != board(i, j)){
                         std::cout << "Error: Different pieces in the same tile" << std::endl;
                     }
                 }
