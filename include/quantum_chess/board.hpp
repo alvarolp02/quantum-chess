@@ -139,7 +139,7 @@ class Board {
                 if (board_matrix(t.row, i) == gap) {
                     validMoves.push_back(Tile(t.row, i));
                 } else if(board_matrix(t.row, i) >= 7) {
-                    validMoves.push_back(Tile(i, t.col));
+                    validMoves.push_back(Tile(t.row, i));
                     break;
                 } else {
                     break;
@@ -149,7 +149,7 @@ class Board {
                 if (board_matrix(t.row, i) == gap) {
                     validMoves.push_back(Tile(t.row, i));
                 } else if(board_matrix(t.row, i) >= 7) {
-                    validMoves.push_back(Tile(i, t.col));
+                    validMoves.push_back(Tile(t.row, i));
                     break;
                 } else {
                     break;

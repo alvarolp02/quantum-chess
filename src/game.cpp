@@ -47,7 +47,8 @@ int main(int argc, char * argv[])
         bool is_target = std::find(movements.begin(), movements.end(), input) != movements.end();
         if (is_target) {
           Tile target = input;
-
+          
+          std::cout << tree.pond_matrix << std::endl;
           bool source_is_quantum = tree.pond_matrix(selectedPiece.row, selectedPiece.col) != 1.00;
           bool target_occupied = tree.q_board.board_matrix(target.row, target.col) != gap;
           

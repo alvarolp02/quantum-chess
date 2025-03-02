@@ -24,11 +24,18 @@ struct Tile {
 };
 
 struct Split {
-    int depth;
-    Tile piece;
+    std::vector<int> depths = {};
+    std::vector<Tile> pieces = {};
+
+    Split(std::vector<int> depths, std::vector<Tile> pieces) : depths(depths), pieces(pieces) {}
+
+    Split() {
+        depths = {};
+        pieces = {};
+    }
 
     bool operator==(const Split& other) const {
-        return (depth == other.depth && piece == other.piece);
+        return (depths == other.depths && pieces == other.pieces);
     }
 };
 
