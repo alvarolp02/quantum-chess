@@ -11,7 +11,7 @@ class QCTree {
         Eigen::Matrix<double, 8, 8> pond_matrix;
         Board q_board;
         int depth;
-        std::vector<Split> splits;
+        std::vector<Split*> splits;
         QCNode* root;
         
         QCTree(){
@@ -27,64 +27,97 @@ class QCTree {
         
             // Update splits positions
             for (int i = 0; i < this->splits.size(); ++i) {
-                if(this->splits[i].piece == source){
-                    this->splits[i].piece = target;
-                    break;
+                for (int j = 0; j < this->splits[i]->pieces.size(); ++j) {
+                    if(this->splits[i]->pieces[j] == source){
+                        this->splits[i]->pieces[j] = target;
+                        break;
+                    }
                 }
             }
         }
         
         void split(Tile source, Tile target1, Tile target2){
-        
-            Split s1;
-            s1.depth = this->depth;
-            s1.piece = target1;
-            this->splits.push_back(s1);
-        
-            Split s2;
-            s2.depth = this->depth;
-            s2.piece = target2;
-            splits.push_back(s2);
-        
+            Tile t1 = target1;
+            Tile t2 = target2;
+            
+            bool nested_split = false;
+            for (Split* split : splits){
+                if(std::find(split->pieces.begin(), split->pieces.end(), source) != split->pieces.end()){
+                    split->depths.push_back(this->depth);
+                    split->pieces.erase(std::remove(split->pieces.begin(), split->pieces.end(), source), split->pieces.end());
+                    split->pieces.push_back(target1);
+                    split->pieces.push_back(target2);
+
+                    nested_split = true;
+                    break;
+                }
+            }
+            
+            if (!nested_split){
+                Split* s = new Split();
+                s->depths = {this->depth};
+                s->pieces = {t1, t2};
+                this->splits.push_back(s);
+            }
             this->root->split(source, target1, target2);
+
             this->depth++;
+            
+            std::cout << ":::::::::::::::" << std::endl;
+            for (Split* split : splits){
+                std::cout << "Pieces: ";
+                for (Tile piece : split->pieces){
+                    std::cout << piece.to_string() << " ";
+                }
+                std::cout << "Depths: ";
+                for (int depth : split->depths){
+                    std::cout << depth << " ";
+                }
+                std::cout << std::endl;
+            }
+            std::cout << ":::::::::::::::" << std::endl;
         }
         
         void collapse(Tile piece){
             std::cout << "Collapsing..." << std::endl;
-
-            // Randomly choose one of the children to collapse
-            bool random_boolean = std::rand()%2;
+            bool random_boolean;
             
             for (int i = 0; i < splits.size(); ++i) {
                 // Search the split related to the actual piece
-                if(splits[i].piece == piece){
-                    // Collapse all nodes at depth of split
-                    for (auto node : get_nodes_at_depth(this->splits[i].depth)){
-                        // Delete one of the children randomly
-                        if (random_boolean){
-                            delete_node(node->right); 
-                            node->index = node->left->index;
-                            node->board = node->left->board;
-                            node->right = node->left->right;
-                            node->left = node->left->left;
-                        }else{
-                            delete_node(node->left); 
-                            node->index = node->right->index;
-                            node->board = node->right->board;
-                            node->left = node->right->left;
-                            node->right = node->right->right;
+                if(std::find(splits[i]->pieces.begin(), splits[i]->pieces.end(), piece) != splits[i]->pieces.end()){
+                    
+                    for (int j = splits[i]->depths.size()-1; j >= 0; j--) {
+                        // Randomly choose one of the children to collapse
+                        random_boolean = std::rand()%2;
+
+                        // Collapse all nodes at depth of split
+                        for (auto node : get_nodes_at_depth(this->splits[i]->depths[j])){
+                            // Delete one of the children randomly
+                            if (random_boolean){
+                                delete_node(node->right); 
+                                node->index = node->left->index;
+                                node->board = node->left->board;
+                                node->right = node->left->right;
+                                node->left = node->left->left;
+                            }else{
+                                delete_node(node->left); 
+                                node->index = node->right->index;
+                                node->board = node->right->board;
+                                node->left = node->right->left;
+                                node->right = node->right->right;
+                            }
                         }
                     }
                     
+                    splits.erase(splits.begin() + i);
                     //Erase all splits collapsed
-                    std::vector<Split> new_splits;
-                    for (Split s : splits){
-                        if(s.depth != splits[i].depth){
-                            new_splits.push_back(s);
-                        }
-                    }
-                    splits = new_splits;
+                    // std::vector<Split> new_splits;
+                    // for (Split s : splits){
+                    //     if(s.depth != splits[i].depth){
+                    //         new_splits.push_back(s);
+                    //     }
+                    // }
+                    // splits = new_splits;
                     break;
                 }
             }
@@ -104,8 +137,6 @@ class QCTree {
             std::vector<Eigen::Matrix<int, 8, 8>> boards = {};
             for(auto node : get_nodes_at_depth(this->depth)){
                 boards.push_back(node->board.board_matrix);
-                std::cout << node->board.board_matrix << std::endl;
-                std::cout <<  "------------" << std::endl;
             }
             int n_boards = boards.size();
         
