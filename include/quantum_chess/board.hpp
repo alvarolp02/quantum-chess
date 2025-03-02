@@ -23,11 +23,11 @@
 class Board {
     public:
 
-        Eigen::Matrix<int, 8, 8> board_matrix;
+        Eigen::MatrixXi board_matrix;
 
         Board() {
             // Initialize the board to be gap
-            board_matrix = Eigen::Matrix<int, 8, 8>::Zero();
+            board_matrix = Eigen::MatrixXi::Zero(8, 8);
             board_matrix << b_rook,b_knight,b_bishop,b_queen,b_king,b_bishop,b_knight,b_rook,
                     b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,
                     gap,gap,gap,gap,gap,gap,gap,gap,

@@ -4,8 +4,15 @@
 #include <iomanip>
 
 Interface::Interface() {
+    BOARD_SIZE = 8;
+
     window.create(sf::VideoMode(TILE_SIZE * BOARD_SIZE, TILE_SIZE * BOARD_SIZE), "Tablero de Ajedrez");
-    
+}
+
+Interface::Interface(int board_size) {
+    BOARD_SIZE = board_size;
+
+    window.create(sf::VideoMode(TILE_SIZE * BOARD_SIZE, TILE_SIZE * BOARD_SIZE), "Tablero de Ajedrez");
 }
 
 void Interface::openWindow() {
@@ -60,7 +67,7 @@ void Interface::loadBoard(){
 }
 
 
-void Interface::loadPieces(Eigen::Matrix<int, 8, 8> board){
+void Interface::loadPieces(Eigen::MatrixXi board){
 
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
@@ -125,7 +132,7 @@ void Interface::loadPieces(Eigen::Matrix<int, 8, 8> board){
 
 }
 
-void Interface::loadPonderation(Eigen::Matrix<double, 8, 8> pond_board){
+void Interface::loadPonderation(Eigen::MatrixXd pond_board){
     sf::Font font;
     if (!font.loadFromFile("../assets/montserrat/Montserrat-Bold.otf")) {
         std::cerr << "Error loading font." << std::endl;

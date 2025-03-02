@@ -8,7 +8,7 @@
 class QCTree {
     public:
 
-        Eigen::Matrix<double, 8, 8> pond_matrix;
+        Eigen::MatrixXd pond_matrix;
         Board q_board;
         int depth;
         std::vector<Split*> splits;
@@ -134,14 +134,14 @@ class QCTree {
         
         
         void get_ponderated_board(){
-            std::vector<Eigen::Matrix<int, 8, 8>> boards = {};
+            std::vector<Eigen::MatrixXi> boards = {};
             for(auto node : get_nodes_at_depth(this->depth)){
                 boards.push_back(node->board.board_matrix);
             }
             int n_boards = boards.size();
         
-            pond_matrix = Eigen::Matrix<double, 8, 8>::Zero();
-            q_board.board_matrix = Eigen::Matrix<int, 8, 8>::Zero();
+            pond_matrix = Eigen::MatrixXd::Zero(8, 8);
+            q_board.board_matrix = Eigen::MatrixXi::Zero(8, 8);
         
             for (int i = 0; i < 8; ++i) {
                 for (int j = 0; j < 8; ++j) {
