@@ -9,6 +9,7 @@ include_directories(include
 
 # find dependencies
 find_package(Eigen3 REQUIRED)
+find_package(yaml-cpp REQUIRED)
 find_package(SFML 2.5 COMPONENTS system window graphics network audio REQUIRED)
 
 
@@ -18,8 +19,10 @@ target_link_libraries(game_exec Eigen3::Eigen
                                 sfml-window
                                 sfml-system
                                 sfml-audio 
-                                sfml-network)  
+                                sfml-network
+                                yaml-cpp)  
 
 install(TARGETS
   game_exec
   DESTINATION lib/${PROJECT_NAME})
+

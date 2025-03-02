@@ -4,6 +4,10 @@
 #include "quantum_chess/qc_node.hpp"
 #include <thread>
 #include <random>
+#include <filesystem>
+#include <yaml-cpp/yaml.h>
+
+
 
 void print_interface(Interface* interface, QCTree* tree){
   interface->loadBoard();
@@ -20,17 +24,56 @@ void print_interface(Interface* interface, QCTree* tree, std::vector<Tile> movem
   interface->window.display();
 }
 
+Eigen::MatrixXi load_config(const std::string& filename){
+  YAML::Node config = YAML::LoadFile(filename);
+  std::map<char, int> pieceToInt = {
+    {'.', 0},  {'P', 1},  {'R', 2},  {'N', 3},  {'B', 4}, {'Q', 5},  {'K', 6},
+    {'p', 7}, {'r', 8}, {'n', 9}, {'b', 10}, {'q', 11}, {'k', 12} };
+
+
+  auto values = config["board"];
+  
+  int n = values.size();
+  int m = values[0].size();
+
+  Eigen::MatrixXi matrix = Eigen::MatrixXi::Zero(n, m);
+
+
+  for (int i = 0; i < n; ++i) {
+      for (int j = 0; j < m; ++j) {
+        matrix(i, j) = pieceToInt[values[i][j].as<char>()];
+      }
+  }
+
+  return matrix;
+
+}
+
 
 int main(int argc, char * argv[])
 {
-  QCTree tree = QCTree();
+  QCTree tree;
+  int N=8;
+  if (argc == 2){
+    Eigen::MatrixXi board_matrix = load_config(std::string("../") + argv[1]);
+    std::cout << board_matrix << std::endl;
+    tree = QCTree(board_matrix);
+    N = board_matrix.rows();
+  } else {
+    tree = QCTree();
+  }
 
-  Interface interface = Interface();
+  Interface interface(N);
+  std::cout << "AAAAAAAAAAAAAAAAA" << std::endl;
+
   std::thread thread_0(&Interface::openWindow, &interface); 
+  std::cout << "BBBBBBBBBBBBBB" << std::endl;
   std::string turn = "white";
 
   tree.get_ponderated_board();
+  std::cout << "CCCCCCCCCCCCCCCCCCCCCCc" << std::endl;
   print_interface(&interface, &tree);
+  std::cout << "DDDDDDDDDDDDDDDDDDDddd" << std::endl;
 
   std::vector<Tile> movements;
   Tile selectedPiece;

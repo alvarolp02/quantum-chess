@@ -13,11 +13,25 @@ class QCTree {
         int depth;
         std::vector<Split*> splits;
         QCNode* root;
-        
+        int N_ROWS;
+        int N_COLS;
+
         QCTree(){
-            this->q_board = Board();
+            N_ROWS = 8;
+            N_COLS = 8;
+            this->q_board = Board(Eigen::MatrixXi::Zero(N_ROWS, N_COLS));
             this->depth = 0;
             this->root = new QCNode(Board(),0);
+
+            std::srand(std::time(nullptr)); // use current time as seed for random generator
+        }
+        
+        QCTree(Eigen::MatrixXi matrix){
+            N_ROWS = matrix.rows();
+            N_COLS = matrix.cols();
+            this->q_board = Board(Eigen::MatrixXi::Zero(N_ROWS, N_COLS));
+            this->depth = 0;
+            this->root = new QCNode(Board(matrix),0);
 
             std::srand(std::time(nullptr)); // use current time as seed for random generator
         }
@@ -140,11 +154,11 @@ class QCTree {
             }
             int n_boards = boards.size();
         
-            pond_matrix = Eigen::MatrixXd::Zero(8, 8);
-            q_board.board_matrix = Eigen::MatrixXi::Zero(8, 8);
+            pond_matrix = Eigen::MatrixXd::Zero(N_ROWS, N_COLS);
+            q_board.board_matrix = Eigen::MatrixXi::Zero(N_ROWS, N_COLS);
         
-            for (int i = 0; i < 8; ++i) {
-                for (int j = 0; j < 8; ++j) {
+            for (int i = 0; i < N_ROWS; ++i) {
+                for (int j = 0; j < N_COLS; ++j) {
                     double sum = 0.0;
                     for (auto board : boards) {
                         if (board(i, j) != gap) {
