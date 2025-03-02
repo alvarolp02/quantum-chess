@@ -7,18 +7,21 @@
 
 class Interface {
     public:
-        Interface();
-        void openWindow();
-        void loadBoard();
-        void loadTree(QCTree);
-        void loadPieces(Eigen::Matrix<int, 8, 8>);
-        void loadPonderation(Eigen::Matrix<double, 8, 8>);
-        void loadMovements(std::vector<Tile>);
-        std::vector<Tile> waitForInput();
+        int TILE_SIZE = 100;
+        int N_ROWS;
+        int N_COLS;
 
         sf::RenderWindow window;
 
-    private:
-        int TILE_SIZE = 100;
-        int BOARD_SIZE = 8;
+        // Constructors
+        Interface();
+        Interface(int, int);
+
+        void openWindow();
+        void loadBoard();
+        void loadTree(QCTree);
+        void loadPieces(Eigen::MatrixXi);
+        void loadPonderation(Eigen::MatrixXd);
+        void loadMovements(std::vector<Tile>);
+        std::vector<Tile> waitForInput();
 };
