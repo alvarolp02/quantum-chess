@@ -1,0 +1,6 @@
+board:
+  - [n, b, q, k, q, b, n]
+  - [p, p, p, p, p, p, p]
+  - [., ., ., ., ., ., .]
+  - [P, P, P, P, P, P, P]
+  - [N, B, Q, K, Q, B, N]

@@ -53,27 +53,24 @@ Eigen::MatrixXi load_config(const std::string& filename){
 int main(int argc, char * argv[])
 {
   QCTree tree;
-  int N=8;
+  int rows=8;
+  int cols=8;
   if (argc == 2){
     Eigen::MatrixXi board_matrix = load_config(std::string("../") + argv[1]);
-    std::cout << board_matrix << std::endl;
     tree = QCTree(board_matrix);
-    N = board_matrix.rows();
+    rows = board_matrix.rows();
+    cols = board_matrix.cols();
   } else {
     tree = QCTree();
   }
 
-  Interface interface(N);
-  std::cout << "AAAAAAAAAAAAAAAAA" << std::endl;
+  Interface interface(rows, cols);
 
   std::thread thread_0(&Interface::openWindow, &interface); 
-  std::cout << "BBBBBBBBBBBBBB" << std::endl;
   std::string turn = "white";
 
   tree.get_ponderated_board();
-  std::cout << "CCCCCCCCCCCCCCCCCCCCCCc" << std::endl;
   print_interface(&interface, &tree);
-  std::cout << "DDDDDDDDDDDDDDDDDDDddd" << std::endl;
 
   std::vector<Tile> movements;
   Tile selectedPiece;

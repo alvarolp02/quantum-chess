@@ -4,15 +4,17 @@
 #include <iomanip>
 
 Interface::Interface() {
-    BOARD_SIZE = 8;
+    N_ROWS = 8;
+    N_COLS = 8;
 
-    window.create(sf::VideoMode(TILE_SIZE * BOARD_SIZE, TILE_SIZE * BOARD_SIZE), "Tablero de Ajedrez");
+    window.create(sf::VideoMode(TILE_SIZE * N_COLS, TILE_SIZE * N_ROWS), "Tablero de Ajedrez");
 }
 
-Interface::Interface(int board_size) {
-    BOARD_SIZE = board_size;
+Interface::Interface(int rows, int cols) {
+    N_ROWS = rows;
+    N_COLS = cols;
 
-    window.create(sf::VideoMode(TILE_SIZE * BOARD_SIZE, TILE_SIZE * BOARD_SIZE), "Tablero de Ajedrez");
+    window.create(sf::VideoMode(TILE_SIZE * N_COLS, TILE_SIZE * N_ROWS), "Tablero de Ajedrez");
 }
 
 void Interface::openWindow() {
@@ -57,8 +59,8 @@ void Interface::loadBoard(){
     sf::RectangleShape tile(sf::Vector2f(TILE_SIZE, TILE_SIZE));
 
     window.clear();
-    for (int i = 0; i < BOARD_SIZE; ++i) {
-        for (int j = 0; j < BOARD_SIZE; ++j) {
+    for (int i = 0; i < N_ROWS; ++i) {
+        for (int j = 0; j < N_COLS; ++j) {
             tile.setPosition(j * TILE_SIZE, i * TILE_SIZE);
             tile.setFillColor((i + j) % 2 == 0 ? white : black); // Alternate colors
             window.draw(tile);
@@ -69,8 +71,8 @@ void Interface::loadBoard(){
 
 void Interface::loadPieces(Eigen::MatrixXi board){
 
-    for (int i = 0; i < BOARD_SIZE; ++i) {
-        for (int j = 0; j < BOARD_SIZE; ++j) {
+    for (int i = 0; i < N_ROWS; ++i) {
+        for (int j = 0; j < N_COLS; ++j) {
             if (board(i, j) == 0) {
                 continue;
             }
@@ -139,8 +141,8 @@ void Interface::loadPonderation(Eigen::MatrixXd pond_board){
         return;
     }
 
-    for (int i = 0; i < BOARD_SIZE; ++i) {
-        for (int j = 0; j < BOARD_SIZE; ++j) {
+    for (int i = 0; i < N_ROWS; ++i) {
+        for (int j = 0; j < N_COLS; ++j) {
             if (pond_board(i, j) == 0) {
                 continue;
             }

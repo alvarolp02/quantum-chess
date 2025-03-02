@@ -8,13 +8,14 @@
 class Interface {
     public:
         int TILE_SIZE = 100;
-        int BOARD_SIZE;
+        int N_ROWS;
+        int N_COLS;
 
         sf::RenderWindow window;
 
         // Constructors
         Interface();
-        Interface(int);
+        Interface(int, int);
 
         void openWindow();
         void loadBoard();
