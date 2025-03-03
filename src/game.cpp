@@ -84,8 +84,8 @@ int main(int argc, char * argv[])
          Tile input = inputs[0];
 
         //Check if the input is a valid move
-        bool is_target = std::find(movements.begin(), movements.end(), input) != movements.end();
-        if (is_target) {
+        if (std::find(movements.begin(), movements.end(), input) != movements.end()) {
+
           Tile target = input;
           
           std::cout << tree.pond_matrix << std::endl;
@@ -131,12 +131,20 @@ int main(int argc, char * argv[])
 
 
           if (ALLOW_ENTANGLEMENT){
+            // If entanglement is allowed, get all valid non-capture moves on any possible board
             movements.clear();
             for (Board* board : tree.get_leaf_boards()){
               std::vector<Tile> validMoves = board->getValidMoves(input);
-              movements.insert(movements.end(), validMoves.begin(), validMoves.end());
+              for (Tile move : validMoves){
+                if (tree.q_board.board_matrix(move.row, move.col) == gap) {
+                  movements.push_back(move);
+                }
+              }
             }
+            std::vector<Tile> validCaptures = tree.q_board.getValidMoves(input);
+            movements.insert(movements.end(), validCaptures.begin(), validCaptures.end());
           } else {
+            // If entanglement is not allowed, get only moves allowed on all boards simultaneously
             movements = tree.q_board.getValidMoves(input);
           }
 

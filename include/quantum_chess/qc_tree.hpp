@@ -37,7 +37,7 @@ class QCTree {
         }
         
         void propagate(Tile source, Tile target){
-            // this->root->propagate(source, target);
+            // Move the piece in all leaf nodes and store wether the move was possible or not
             std::vector<bool> moves_result = {};
             int sum = 0;
             for (Board* board : get_leaf_boards()){
@@ -45,23 +45,22 @@ class QCTree {
                 sum += int(moves_result.back());
             }
 
-            for (auto m : moves_result){
-                std::cout << m << " ";
-            }
-            std::cout << std::endl;
 
+            // Search depths where entanglement occurs by comparing the number of moves that are possible
             std::vector<int> entanglement_depths = {};
 
             if (sum < moves_result.size()){
                 double p = double(sum)/moves_result.size();
                 int i = 1;
-                std::vector <int> depths = {};
-                depths.push_back(this->root->index);
+
+                // Get actual depths list
+                std::vector <int> depths = {this->root->index};
                 QCNode* node = this->root;
                 while (node->left != nullptr && node->right != nullptr){
                     depths.push_back(node->left->index);
                     node = node->left;
                 }
+
                 while (moves_result.size() > 1){
                     sum = 0;
                     std::vector<bool> new_moves_result = {};
@@ -70,6 +69,8 @@ class QCTree {
                         sum += int(new_moves_result.back());
                     }
                     
+                    // If the proportion of moves that are possible is higher than the previous one, 
+                    // then there is entanglement with the split at this depth
                     double p2 = double(sum)/new_moves_result.size();
                     if (p2 > p){
                         entanglement_depths.push_back(depths[depths.size()-i-1]);
@@ -82,6 +83,7 @@ class QCTree {
                 }
             }
 
+            // Update splits pieces with entanglement
             for (int d : entanglement_depths){
                 for (auto s : splits){
                     if (std::find(s->depths.begin(), s->depths.end(), d) != s->depths.end()){
