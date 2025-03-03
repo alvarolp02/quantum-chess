@@ -48,10 +48,14 @@ class Board {
             board_matrix = matrix;
         }
         
-        void movePiece(Tile source, Tile target) {
-            if(board_matrix(source.row, source.col)!=gap){
+        bool movePiece(Tile source, Tile target) {
+            auto allowed_moves = this->getValidMoves(source);
+            if (std::find(allowed_moves.begin(), allowed_moves.end(), target) != allowed_moves.end()) {
                 board_matrix(target.row, target.col) = board_matrix(source.row, source.col);
                 board_matrix(source.row, source.col) = gap;
+                return true;
+            } else {
+                return false;
             }
         }
         
@@ -71,6 +75,8 @@ class Board {
             int piece = board_matrix(t.row, t.col);
         
             switch (piece){
+                case gap:
+                    return {};
                 case w_pawn:
                     return getValidWhitePawnMoves(t);
                 case w_rook:
