@@ -37,7 +37,61 @@ class QCTree {
         }
         
         void propagate(Tile source, Tile target){
-            this->root->propagate(source, target);
+            // this->root->propagate(source, target);
+            std::vector<bool> moves_result = {};
+            int sum = 0;
+            for (Board* board : get_leaf_boards()){
+                moves_result.push_back(board->movePiece(source, target));
+                sum += int(moves_result.back());
+            }
+
+            for (auto m : moves_result){
+                std::cout << m << " ";
+            }
+            std::cout << std::endl;
+
+            std::vector<int> entanglement_depths = {};
+
+            if (sum < moves_result.size()){
+                double p = double(sum)/moves_result.size();
+                int i = 1;
+                std::vector <int> depths = {};
+                depths.push_back(this->root->index);
+                QCNode* node = this->root;
+                while (node->left != nullptr && node->right != nullptr){
+                    depths.push_back(node->left->index);
+                    node = node->left;
+                }
+                while (moves_result.size() > 1){
+                    sum = 0;
+                    std::vector<bool> new_moves_result = {};
+                    for (int i = 0; i < moves_result.size(); i+=2){
+                        new_moves_result.push_back(moves_result[i] || moves_result[i+1]);
+                        sum += int(new_moves_result.back());
+                    }
+                    
+                    double p2 = double(sum)/new_moves_result.size();
+                    if (p2 > p){
+                        entanglement_depths.push_back(depths[depths.size()-i-1]);
+                        std::cout << "Entanglement at depth: " << depths[depths.size()-i-1] << std::endl;
+                    }
+
+                    i++;
+                    p=p2;
+                    moves_result = new_moves_result;
+                }
+            }
+
+            for (int d : entanglement_depths){
+                for (auto s : splits){
+                    if (std::find(s->depths.begin(), s->depths.end(), d) != s->depths.end()){
+                        s->pieces.push_back(source);
+                        s->pieces.push_back(target);
+                    }
+                }
+            }
+
+            
         
             // Update splits positions
             for (int i = 0; i < this->splits.size(); ++i) {
@@ -105,7 +159,8 @@ class QCTree {
                         random_boolean = std::rand()%2;
 
                         // Collapse all nodes at depth of split
-                        for (auto node : get_nodes_at_depth(this->splits[i]->depths[j])){
+                        int D = this->splits[i]->depths[j];
+                        for (auto node : get_nodes_at_depth(D)){
                             // Delete one of the children randomly
                             if (random_boolean){
                                 delete_node(node->right); 
@@ -124,18 +179,19 @@ class QCTree {
                     }
                     
                     splits.erase(splits.begin() + i);
-                    //Erase all splits collapsed
-                    // std::vector<Split> new_splits;
-                    // for (Split s : splits){
-                    //     if(s.depth != splits[i].depth){
-                    //         new_splits.push_back(s);
-                    //     }
-                    // }
-                    // splits = new_splits;
                     break;
                 }
             }
         
+        }
+
+
+        std::vector<Board*> get_leaf_boards(){
+            std::vector<Board*> leaf_boards = {};
+            for (auto node : get_nodes_at_depth(this->depth)){
+                leaf_boards.push_back(&(node->board));
+            }
+            return leaf_boards;
         }
         
 

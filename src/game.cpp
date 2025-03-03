@@ -7,7 +7,7 @@
 #include <filesystem>
 #include <yaml-cpp/yaml.h>
 
-
+bool ALLOW_ENTANGLEMENT = true;
 
 void print_interface(Interface* interface, QCTree* tree){
   interface->loadBoard();
@@ -128,7 +128,19 @@ int main(int argc, char * argv[])
           }
 
           tree.get_ponderated_board();
-          movements = tree.q_board.getValidMoves(input);
+
+
+          if (ALLOW_ENTANGLEMENT){
+            movements.clear();
+            for (Board* board : tree.get_leaf_boards()){
+              std::vector<Tile> validMoves = board->getValidMoves(input);
+              movements.insert(movements.end(), validMoves.begin(), validMoves.end());
+            }
+          } else {
+            movements = tree.q_board.getValidMoves(input);
+          }
+
+
           print_interface(&interface, &tree, movements);
 
           selectedPiece = input;

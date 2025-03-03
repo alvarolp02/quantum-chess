@@ -20,16 +20,16 @@ class QCNode {
         }
         
         // Update the board for all leaf nodes
-        void propagate(Tile source, Tile target){
+        // void propagate(Tile source, Tile target){
         
-            if(this->left == nullptr && this->right == nullptr){
-                this->board.movePiece(source, target);
-            }else{
-                this->left->propagate(source, target);
-                this->right->propagate(source, target);
-            }
+        //     if(this->left == nullptr && this->right == nullptr){
+        //         this->board.movePiece(source, target);
+        //     }else{
+        //         this->left->propagate(source, target);
+        //         this->right->propagate(source, target);
+        //     }
         
-        }
+        // }
         
         // Split all leaf nodes in two
         void split(Tile source, Tile target1, Tile target2){
