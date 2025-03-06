@@ -90,7 +90,8 @@ int main(int argc, char * argv[])
           
           std::cout << tree.pond_matrix << std::endl;
           bool source_is_quantum = tree.pond_matrix(selectedPiece.row, selectedPiece.col) != 1.00;
-          bool target_occupied = tree.q_board.board_matrix(target.row, target.col) != gap;
+          bool target_occupied = tree.q_board.board_matrix(target.row, target.col) != gap
+                  && tree.q_board.board_matrix(target.row, target.col) != tree.q_board.board_matrix(selectedPiece.row, selectedPiece.col);
           
           // If a quantum piece is used to capture an occupied tile, collapse the piece
           if(source_is_quantum && target_occupied){
@@ -136,7 +137,8 @@ int main(int argc, char * argv[])
             for (Board* board : tree.get_leaf_boards()){
               std::vector<Tile> validMoves = board->getValidMoves(input);
               for (Tile move : validMoves){
-                if (tree.q_board.board_matrix(move.row, move.col) == gap) {
+                if (tree.q_board.board_matrix(move.row, move.col) == gap || 
+                      tree.q_board.board_matrix(move.row, move.col) == board->board_matrix(input.row, input.col)){
                   movements.push_back(move);
                 }
               }
