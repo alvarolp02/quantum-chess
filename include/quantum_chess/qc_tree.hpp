@@ -86,7 +86,9 @@ class QCTree {
             // Update splits pieces with entanglement
             for (int d : entanglement_depths){
                 for (auto s : splits){
-                    if (std::find(s->depths.begin(), s->depths.end(), d) != s->depths.end()){
+                    // Check the split depth and if the source piece is not already in the split
+                    if (std::find(s->depths.begin(), s->depths.end(), d) != s->depths.end()
+                        && std::find(s->pieces.begin(), s->pieces.end(), source) == s->pieces.end()){
                         s->pieces.push_back(source);
                         s->pieces.push_back(target);
                     }
@@ -97,11 +99,23 @@ class QCTree {
         
             // Update splits positions
             for (int i = 0; i < this->splits.size(); ++i) {
-                for (int j = 0; j < this->splits[i]->pieces.size(); ++j) {
-                    if(this->splits[i]->pieces[j] == source){
-                        this->splits[i]->pieces[j] = target;
+                Split* s = this->splits[i];
+                for (int j = 0; j < s->pieces.size(); ++j) {
+                    if(s->pieces[j] == source){
+                        // If the target is not in the split, update the source position
+                        if (std::find(s->pieces.begin(), s->pieces.end(), target) == s->pieces.end()){
+                            s->pieces[j] = target;
+                        // If the target is already in the split, remove the source position
+                        } else {
+                            s->pieces.erase(s->pieces.begin() + j);
+                        }
                         break;
                     }
+                }
+                // This only occurs when a piece is merged with itself and its probability is 1
+                // We collapse the split to avoid redundant branches
+                if (s->pieces.size() == 1){
+                    this->collapse(s->pieces[0]);
                 }
             }
         }
