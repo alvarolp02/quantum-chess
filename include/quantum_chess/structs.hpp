@@ -1,5 +1,4 @@
-#ifndef TILE_H
-#define TILE_H
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -38,6 +37,3 @@ struct Split {
         return (depths == other.depths && pieces == other.pieces);
     }
 };
-
-
-#endif // TILE_H

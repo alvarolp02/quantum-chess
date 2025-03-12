@@ -1,9 +1,9 @@
-#ifndef BOARD_H
-#define BOARD_H
+#pragma once
 
 #include <iostream>
 #include <Eigen/Dense>
 #include "structs.hpp"
+#include "utils.hpp"
 
 #define gap 0
 #define w_pawn 1
@@ -50,7 +50,7 @@ class Board {
         
         bool movePiece(Tile source, Tile target) {
             auto allowed_moves = this->getValidMoves(source);
-            if (std::find(allowed_moves.begin(), allowed_moves.end(), target) != allowed_moves.end()) {
+            if (contains(allowed_moves, target)) {
                 board_matrix(target.row, target.col) = board_matrix(source.row, source.col);
                 board_matrix(source.row, source.col) = gap;
                 return true;
@@ -500,5 +500,3 @@ class Board {
         }
 
 };
-
-#endif // BOARD_H
