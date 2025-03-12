@@ -81,11 +81,6 @@ int main(int argc, char * argv[])
 
       //If left click, the input is either a simple move or selecting a piece
       if (inputs.size() == 1){
-        for (auto s : tree.splits){
-          for (auto t : s->pieces){
-            std::cout << t.to_string() << std::endl;
-          }
-        }
         Tile input = inputs[0];
 
         //Check if the input is a valid move
