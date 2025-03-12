@@ -1,8 +1,8 @@
-#ifndef QCTREE_H
-#define QCTREE_H
+#pragma once
 
 #include <iostream>
 #include "quantum_chess/qc_node.hpp"
+#include "quantum_chess/utils.hpp"
 #include <random> 
 
 class QCTree {
@@ -86,7 +86,8 @@ class QCTree {
             // Update splits pieces with entanglement
             for (int d : entanglement_depths){
                 for (auto s : splits){
-                    if (std::find(s->depths.begin(), s->depths.end(), d) != s->depths.end()){
+                    // Check the split depth and if the source piece is not already in the split
+                    if(contains(s->depths, d) && !contains(s->pieces, source)){
                         s->pieces.push_back(source);
                         s->pieces.push_back(target);
                     }
@@ -97,11 +98,23 @@ class QCTree {
         
             // Update splits positions
             for (int i = 0; i < this->splits.size(); ++i) {
-                for (int j = 0; j < this->splits[i]->pieces.size(); ++j) {
-                    if(this->splits[i]->pieces[j] == source){
-                        this->splits[i]->pieces[j] = target;
+                Split* s = this->splits[i];
+                for (int j = 0; j < s->pieces.size(); ++j) {
+                    if(s->pieces[j] == source){
+                        // If the target is not in the split, update the source position
+                        if (!contains(s->pieces, target)){
+                            s->pieces[j] = target;
+                        // If the target is already in the split, remove the source position
+                        } else {
+                            s->pieces.erase(s->pieces.begin() + j);
+                        }
                         break;
                     }
+                }
+                // This only occurs when a piece is merged with itself and its probability is 1
+                // We collapse the split to avoid redundant branches
+                if (s->pieces.size() == 1){
+                    this->collapse(s->pieces[0]);
                 }
             }
         }
@@ -112,7 +125,7 @@ class QCTree {
             
             bool nested_split = false;
             for (Split* split : splits){
-                if(std::find(split->pieces.begin(), split->pieces.end(), source) != split->pieces.end()){
+                if(contains(split->pieces, source)){
                     split->depths.push_back(this->depth);
                     split->pieces.erase(std::remove(split->pieces.begin(), split->pieces.end(), source), split->pieces.end());
                     split->pieces.push_back(target1);
@@ -154,7 +167,7 @@ class QCTree {
             
             for (int i = 0; i < splits.size(); ++i) {
                 // Search the split related to the actual piece
-                if(std::find(splits[i]->pieces.begin(), splits[i]->pieces.end(), piece) != splits[i]->pieces.end()){
+                if(contains(splits[i]->pieces, piece)) {
                     
                     for (int j = splits[i]->depths.size()-1; j >= 0; j--) {
                         // Randomly choose one of the children to collapse
@@ -287,5 +300,3 @@ class QCTree {
 
 
 };
-
-#endif // QCTREE

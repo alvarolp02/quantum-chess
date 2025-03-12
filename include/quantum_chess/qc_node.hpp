@@ -1,5 +1,4 @@
-#ifndef QCNODE_H
-#define QCNODE_H
+#pragma once
 
 #include <iostream>
 #include "quantum_chess/board.hpp"
@@ -47,5 +46,3 @@ class QCNode {
         }
         
 };
-
-#endif // QCNODE_H

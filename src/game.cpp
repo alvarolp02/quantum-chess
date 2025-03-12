@@ -2,6 +2,7 @@
 #include "quantum_chess/qc_tree.hpp"
 #include "quantum_chess/board.hpp"
 #include "quantum_chess/qc_node.hpp"
+#include "quantum_chess/utils.hpp"
 #include <thread>
 #include <random>
 #include <filesystem>
@@ -80,17 +81,18 @@ int main(int argc, char * argv[])
       std::vector<Tile> inputs = interface.waitForInput();
 
       //If left click, the input is either a simple move or selecting a piece
-      if (inputs.size() == 1){
-         Tile input = inputs[0];
+      if (inputs.size() == 1) {
+        Tile input = inputs[0];
 
         //Check if the input is a valid move
-        if (std::find(movements.begin(), movements.end(), input) != movements.end()) {
+        if (contains(movements, input)) {
 
           Tile target = input;
           
           std::cout << tree.pond_matrix << std::endl;
           bool source_is_quantum = tree.pond_matrix(selectedPiece.row, selectedPiece.col) != 1.00;
-          bool target_occupied = tree.q_board.board_matrix(target.row, target.col) != gap;
+          bool target_occupied = tree.q_board.board_matrix(target.row, target.col) != gap
+                  && tree.q_board.board_matrix(target.row, target.col) != tree.q_board.board_matrix(selectedPiece.row, selectedPiece.col);
           
           // If a quantum piece is used to capture an occupied tile, collapse the piece
           if(source_is_quantum && target_occupied){
@@ -136,7 +138,8 @@ int main(int argc, char * argv[])
             for (Board* board : tree.get_leaf_boards()){
               std::vector<Tile> validMoves = board->getValidMoves(input);
               for (Tile move : validMoves){
-                if (tree.q_board.board_matrix(move.row, move.col) == gap) {
+                if (tree.q_board.board_matrix(move.row, move.col) == gap || 
+                      tree.q_board.board_matrix(move.row, move.col) == board->board_matrix(input.row, input.col)){
                   movements.push_back(move);
                 }
               }
@@ -160,9 +163,9 @@ int main(int argc, char * argv[])
 
 
         // Check both movements are valid and the target tiles are empty
-        bool target1_ok = std::find(movements.begin(), movements.end(), target1) != movements.end() 
+        bool target1_ok = contains(movements, target1) 
                             && tree.q_board.board_matrix(target1.row, target1.col) == gap;
-        bool target2_ok = std::find(movements.begin(), movements.end(), target2) != movements.end()
+        bool target2_ok = contains(movements, target2)
                             && tree.q_board.board_matrix(target2.row, target2.col) == gap;
 
         
