@@ -89,7 +89,19 @@ class Board {
         bool isBlack(Tile t) {
             return board_matrix(t.row, t.col) >= 7;
         }
+
+        bool isWhite(int row, int col) {
+            return board_matrix(row, col) < 7 && board_matrix(row, col) != gap;
+        }
+
+        bool isBlack(int row, int col) {
+            return board_matrix(row, col) >= 7;
+        }
         
+        std::vector<Tile> getValidMoves(int row, int col) {
+            return getValidMoves(Tile(row, col));
+        }
+
         std::vector<Tile> getValidMoves(Tile t) {
             int piece = board_matrix(t.row, t.col);
         

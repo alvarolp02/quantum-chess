@@ -10,10 +10,17 @@
 
 class Game {
     public:
+        int N_ROWS;
+        int N_COLS;
+	    QCTree tree_;
+	    std::vector<std::vector<Tile>> movements_;
+	    std::vector<std::vector<Tile>> collapse_movements_;
 
         Game(const std::string& config_file);
 
-        bool ALLOW_ENTANGLEMENT = true;
+        bool ALLOW_ENTANGLEMENT = false;
+
+        void get_movements(std::string turn);
 
         void print_interface(Interface* interface, QCTree* tree){
             interface->loadBoard();
