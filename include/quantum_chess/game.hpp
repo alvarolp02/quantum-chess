@@ -12,7 +12,13 @@ class Game {
     public:
         int N_ROWS;
         int N_COLS;
+        std::string turn_ = "white";
+        std::string WHITE_PLAYER = "human";
+        std::string BLACK_PLAYER = "human";
+
 	    QCTree tree_;
+        Interface* interface_;
+        Tile selected_piece_ = Tile(-1, -1);
 	    std::vector<std::vector<Tile>> movements_;
 	    std::vector<std::vector<Tile>> collapse_movements_;
 
@@ -20,21 +26,23 @@ class Game {
 
         bool ALLOW_ENTANGLEMENT = false;
 
+        void human_turn();
+        void bot_turn();
         void get_movements(std::string turn);
 
-        void print_interface(Interface* interface, QCTree* tree){
-            interface->loadBoard();
-            interface->loadPieces(tree->q_board.board_matrix);
-            interface->loadPonderation(tree->pond_matrix);
-            interface->window.display();
+        void print_interface(){
+            interface_->loadBoard();
+            interface_->loadPieces(tree_.q_board.board_matrix);
+            interface_->loadPonderation(tree_.pond_matrix);
+            interface_->window.display();
         }
             
-        void print_interface(Interface* interface, QCTree* tree, std::vector<Tile> movements){
-            interface->loadBoard();
-            interface->loadPieces(tree->q_board.board_matrix);
-            interface->loadPonderation(tree->pond_matrix);
-            interface->loadMovements(movements);
-            interface->window.display();
+        void print_interface(std::vector<Tile> movements){
+            interface_->loadBoard();
+            interface_->loadPieces(tree_.q_board.board_matrix);
+            interface_->loadPonderation(tree_.pond_matrix);
+            interface_->loadMovements(movements);
+            interface_->window.display();
         }
 
         Eigen::MatrixXi load_config(const std::string& filename){
