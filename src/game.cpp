@@ -85,7 +85,10 @@ void Game::human_turn(){
 
 
 void Game::bot_turn(){
-	return;
+
+	tree_.propagate(movements_[0][0], movements_[0][1]);
+
+	turn_ = turn_ == "white" ? "black" : "white";
 }
 
 

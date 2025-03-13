@@ -14,7 +14,7 @@ class Game {
         int N_COLS;
         std::string turn_ = "white";
         std::string WHITE_PLAYER = "human";
-        std::string BLACK_PLAYER = "human";
+        std::string BLACK_PLAYER = "bot";
 
 	    QCTree tree_;
         Interface* interface_;
@@ -24,7 +24,7 @@ class Game {
 
         Game(const std::string& config_file);
 
-        bool ALLOW_ENTANGLEMENT = false;
+        bool ALLOW_ENTANGLEMENT = true;
 
         void human_turn();
         void bot_turn();
