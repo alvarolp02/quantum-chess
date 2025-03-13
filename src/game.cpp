@@ -70,7 +70,6 @@ int main(int argc, char * argv[])
   std::thread thread_0(&Interface::openWindow, &interface); 
   std::string turn = "white";
 
-  tree.get_ponderated_board();
   print_interface(&interface, &tree);
 
   std::vector<Tile> movements;
@@ -82,6 +81,7 @@ int main(int argc, char * argv[])
 
       //If left click, the input is either a simple move or selecting a piece
       if (inputs.size() == 1) {
+        std::cout << tree.score << std::endl;
         Tile input = inputs[0];
 
         //Check if the input is a valid move
@@ -97,7 +97,6 @@ int main(int argc, char * argv[])
           // If a quantum piece is used to capture an occupied tile, collapse the piece
           if(source_is_quantum && target_occupied){
             tree.collapse(selectedPiece);
-            tree.get_ponderated_board();
 
             // If the piece is real, capture the target
             if(tree.q_board.board_matrix(selectedPiece.row, selectedPiece.col) != 0){
@@ -112,7 +111,6 @@ int main(int argc, char * argv[])
           }
 
           tree.print_tree();
-          tree.get_ponderated_board();
 
           print_interface(&interface, &tree);
           turn = turn == "white" ? "black" : "white"; 
@@ -120,7 +118,7 @@ int main(int argc, char * argv[])
           Tile selectedPiece;
           continue;
 
-        } else { // The input is not a move
+        } else { // The input is selecting a piece
 
           //Check if the input is a selecting a valid piece
           if (turn == "white" && tree.q_board.isWhite(input) == false) {
@@ -128,9 +126,6 @@ int main(int argc, char * argv[])
           } else if (turn == "black" && tree.q_board.isBlack(input) == false) {
             continue;
           }
-
-          tree.get_ponderated_board();
-
 
           if (ALLOW_ENTANGLEMENT){
             // If entanglement is allowed, get all valid non-capture moves on any possible board
@@ -176,7 +171,6 @@ int main(int argc, char * argv[])
                 target1.to_string()<<" "<<target2.to_string()<<std::endl;
 
           tree.print_tree();
-          tree.get_ponderated_board();
           print_interface(&interface, &tree);
           turn = turn == "white" ? "black" : "white"; 
           movements.clear();

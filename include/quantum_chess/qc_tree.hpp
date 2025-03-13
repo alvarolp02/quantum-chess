@@ -15,15 +15,19 @@ class QCTree {
         QCNode* root;
         int N_ROWS;
         int N_COLS;
+        double score;
 
         QCTree(){
             N_ROWS = 8;
             N_COLS = 8;
+            score = 0.0;
             this->q_board = Board(Eigen::MatrixXi::Zero(N_ROWS, N_COLS));
             this->depth = 0;
             this->root = new QCNode(Board(),0);
 
             std::srand(std::time(nullptr)); // use current time as seed for random generator
+            this->get_ponderated_board();
+            this->compute_tree_score();
         }
         
         QCTree(Eigen::MatrixXi matrix){
@@ -34,6 +38,8 @@ class QCTree {
             this->root = new QCNode(Board(matrix),0);
 
             std::srand(std::time(nullptr)); // use current time as seed for random generator
+            this->get_ponderated_board();
+            this->compute_tree_score();
         }
         
         void propagate(Tile source, Tile target){
@@ -117,6 +123,9 @@ class QCTree {
                     this->collapse(s->pieces[0]);
                 }
             }
+
+            this->get_ponderated_board();
+            this->compute_tree_score();
         }
         
         void split(Tile source, Tile target1, Tile target2){
@@ -145,20 +154,8 @@ class QCTree {
             this->root->split(source, target1, target2);
 
             this->depth++;
-            
-            std::cout << ":::::::::::::::" << std::endl;
-            for (Split* split : splits){
-                std::cout << "Pieces: ";
-                for (Tile piece : split->pieces){
-                    std::cout << piece.to_string() << " ";
-                }
-                std::cout << "Depths: ";
-                for (int depth : split->depths){
-                    std::cout << depth << " ";
-                }
-                std::cout << std::endl;
-            }
-            std::cout << ":::::::::::::::" << std::endl;
+            this->get_ponderated_board();
+            this->compute_tree_score();
         }
         
         void collapse(Tile piece){
@@ -197,8 +194,11 @@ class QCTree {
                     break;
                 }
             }
-        
+
+            this->get_ponderated_board();
+            this->compute_tree_score();
         }
+
 
 
         std::vector<Board*> get_leaf_boards(){
@@ -216,35 +216,6 @@ class QCTree {
             std::cout  << std::endl << std::endl;
         }
         
-        
-        
-        void get_ponderated_board(){
-            std::vector<Eigen::MatrixXi> boards = {};
-            for(auto node : get_nodes_at_depth(this->depth)){
-                boards.push_back(node->board.board_matrix);
-            }
-            int n_boards = boards.size();
-        
-            pond_matrix = Eigen::MatrixXd::Zero(N_ROWS, N_COLS);
-            q_board.board_matrix = Eigen::MatrixXi::Zero(N_ROWS, N_COLS);
-        
-            for (int i = 0; i < N_ROWS; ++i) {
-                for (int j = 0; j < N_COLS; ++j) {
-                    double sum = 0.0;
-                    for (auto board : boards) {
-                        if (board(i, j) != gap) {
-                            sum+=1;
-                            if(q_board.board_matrix(i, j) == gap){
-                                q_board.board_matrix(i, j) = board(i, j);
-                            } else if (q_board.board_matrix(i, j) != board(i, j)){
-                                std::cout << "Error: Different pieces in the same tile" << std::endl;
-                            }
-                        }
-                    }
-                    pond_matrix(i, j) = sum/n_boards;
-                }
-            }
-        }
     
 
     private: 
@@ -297,6 +268,46 @@ class QCTree {
         
             return acum;
         }
+
+
+        void get_ponderated_board(){
+            std::vector<Eigen::MatrixXi> boards = {};
+            for(auto node : get_nodes_at_depth(this->depth)){
+                boards.push_back(node->board.board_matrix);
+            }
+            int n_boards = boards.size();
+        
+            pond_matrix = Eigen::MatrixXd::Zero(N_ROWS, N_COLS);
+            q_board.board_matrix = Eigen::MatrixXi::Zero(N_ROWS, N_COLS);
+        
+            for (int i = 0; i < N_ROWS; ++i) {
+                for (int j = 0; j < N_COLS; ++j) {
+                    double sum = 0.0;
+                    for (auto board : boards) {
+                        if (board(i, j) != gap) {
+                            sum+=1;
+                            if(q_board.board_matrix(i, j) == gap){
+                                q_board.board_matrix(i, j) = board(i, j);
+                            } else if (q_board.board_matrix(i, j) != board(i, j)){
+                                std::cout << "Error: Different pieces in the same tile" << std::endl;
+                            }
+                        }
+                    }
+                    pond_matrix(i, j) = sum/n_boards;
+                }
+            }
+        }
+
+
+        void compute_tree_score(){
+            double sum = 0.0;
+            for (int i = 0; i < this->q_board.N_ROWS; ++i) {
+                for (int j = 0; j < this->q_board.N_COLS; ++j) {
+                    sum += this->q_board.get_score(i,j) * this->pond_matrix(i, j);
+                }
+            }
+            this->score = sum;
+        } 
 
 
 };

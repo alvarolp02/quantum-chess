@@ -26,6 +26,20 @@ class Board {
         Eigen::MatrixXi board_matrix;
         int N_ROWS;
         int N_COLS;
+        std::map<int, double> piece_values = {
+            {w_pawn, 1.0},
+            {w_rook, 5.0},
+            {w_knight, 3.0},
+            {w_bishop, 3.0},
+            {w_queen, 9.0},
+            {w_king, 100.0},
+            {b_pawn, -1.0},
+            {b_rook, -5.0},
+            {b_knight, -3.0},
+            {b_bishop, -3.0},
+            {b_queen, -9.0},
+            {b_king, -100.0}
+        };
 
         Board() {
             // Initialize the board to be gap
@@ -57,6 +71,10 @@ class Board {
             } else {
                 return false;
             }
+        }
+
+        double get_score(int row, int col){
+            return piece_values[board_matrix(row, col)];
         }
         
         void printBoard() {
