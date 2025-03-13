@@ -4,9 +4,10 @@
 #include "quantum_chess/qc_node.hpp"
 #include "quantum_chess/utils.hpp"
 #include <random> 
+#include <ctime>
 
 class QCTree {
-    public:
+    public:                             
 
         Eigen::MatrixXd pond_matrix;
         Board q_board;

@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include "structs.hpp"
 #include "utils.hpp"
+#include <map>
 
 #define gap 0
 #define w_pawn 1
