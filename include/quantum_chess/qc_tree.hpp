@@ -30,6 +30,55 @@ class QCTree {
             this->get_ponderated_board();
             this->compute_tree_score();
         }
+
+        // Deep copy constructor
+        QCTree(const QCTree& other): pond_matrix(other.pond_matrix), q_board(other.q_board), depth(other.depth),
+                            N_ROWS(other.N_ROWS), N_COLS(other.N_COLS), score(other.score), root(nullptr) {
+            // Deep copy splits 
+            splits.reserve(other.splits.size());
+            for (auto s : other.splits) {
+                if (s != nullptr)
+                    splits.push_back(new Split(*s));
+                else
+                    splits.push_back(nullptr);
+            }
+            // Deep copy root
+            if (other.root != nullptr)
+                root = new QCNode(*other.root);
+        }
+
+        // Deep copy assignment operator
+        QCTree& operator=(const QCTree& other) {
+            if (this == &other)
+                return *this; // Avoid self-assignment
+            clear(); // Free memory
+            pond_matrix = other.pond_matrix;
+            q_board = other.q_board;
+            depth = other.depth;
+            N_ROWS = other.N_ROWS;
+            N_COLS = other.N_COLS;
+            score = other.score;
+
+            // Deep copy splits
+            splits.reserve(other.splits.size());
+            for (auto s : other.splits) {
+                if (s != nullptr)
+                    splits.push_back(new Split(*s));
+                else
+                    splits.push_back(nullptr);
+            }
+
+            // Deep copy root
+            if (other.root != nullptr)
+                root = new QCNode(*other.root);
+
+            return *this;
+        }
+
+        // Destructor
+        ~QCTree() {
+            clear();
+        }
         
         QCTree(Eigen::MatrixXi matrix){
             N_ROWS = matrix.rows();
@@ -309,6 +358,19 @@ class QCTree {
             }
             this->score = sum;
         } 
+
+         // Método para liberar memoria
+        void clear() {
+            // Liberar splits
+            for (auto s : splits) {
+                delete s;
+            }
+            splits.clear();
+
+            // Liberar root
+            delete root;
+            root = nullptr;
+        }
 
 
 };

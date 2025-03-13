@@ -14,7 +14,7 @@ class Game {
         int N_COLS;
         std::string turn_ = "white";
         std::string WHITE_PLAYER = "human";
-        std::string BLACK_PLAYER = "bot";
+        std::string BLACK_PLAYER = "human";
 
 	    QCTree tree_;
         Interface* interface_;

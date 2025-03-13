@@ -11,12 +11,52 @@ class QCNode {
         QCNode* left;
         QCNode* right;
 
+        // Default constructor
+        QCNode(): index(0), left(nullptr), right(nullptr) {}
+
+        // Constructor
         QCNode(Board B, int index){
             this->board = B;
             this->index = index;
             this->left = nullptr;
             this->right = nullptr;
         }
+
+        // Deep copy constructor
+        QCNode(const QCNode& other): index(other.index), board(other.board),
+                                        left(nullptr), right(nullptr) {
+            if (other.left != nullptr)
+                left = new QCNode(*other.left);
+            if (other.right != nullptr)
+                right = new QCNode(*other.right);
+        }
+
+        // Deep copy assignment operator
+        QCNode& operator=(const QCNode& other) {
+            if (this == &other)
+                return *this; // Avoid self-assignment
+            clear(); // Free memory
+            index = other.index;
+            board = other.board;
+            // Deep copy left subtree
+            if (other.left != nullptr)
+                left = new QCNode(*other.left);
+            else
+                left = nullptr;
+            // Deep copy right subtree
+            if (other.right != nullptr)
+                right = new QCNode(*other.right);
+            else
+                right = nullptr;
+
+            return *this;
+        }
+
+        // Destructor
+        ~QCNode() {
+            clear();
+        }
+
         
         // Split all leaf nodes in two
         void split(Tile source, Tile target1, Tile target2){
@@ -31,6 +71,15 @@ class QCNode {
                 this->left->split(source, target1, target2);
                 this->right->split(source, target1, target2);
             }
+        }
+
+    private:
+        // Free memory
+        void clear() {
+            delete left;
+            delete right;
+            left = nullptr;
+            right = nullptr;
         }
         
 };

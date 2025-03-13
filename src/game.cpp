@@ -86,7 +86,15 @@ void Game::human_turn(){
 
 void Game::bot_turn(){
 
-	tree_.propagate(movements_[0][0], movements_[0][1]);
+	// tree_.propagate(movements_[0][0], movements_[0][1]);
+	for (auto move : movements_){
+		if (move.size() == 2){
+			QCTree new_tree = tree_;
+			new_tree.propagate(move[0], move[1]);
+			std::cout<< "Simple move: "<<move[0].to_string()<<" "<<move[1].to_string()<<std::endl;
+			std::cout << "Score: " << new_tree.score << std::endl;
+		}
+	}
 
 	turn_ = turn_ == "white" ? "black" : "white";
 }
