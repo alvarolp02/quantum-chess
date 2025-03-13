@@ -22,7 +22,7 @@ Game::Game(const std::string& config_file = ""){
 
 	while(true){
 
-		get_movements(turn_);
+		get_movements();
 
 		if ((turn_=="white" && WHITE_PLAYER=="human") || (turn_=="black" && BLACK_PLAYER=="human")){
 			human_turn();
@@ -91,8 +91,17 @@ void Game::bot_turn(){
 		if (move.size() == 2){
 			QCTree new_tree = tree_;
 			new_tree.propagate(move[0], move[1]);
-			std::cout<< "Simple move: "<<move[0].to_string()<<" "<<move[1].to_string()<<std::endl;
-			std::cout << "Score: " << new_tree.score << std::endl;
+			std::string next_turn = turn_ == "white" ? "black" : "white";
+			auto next_movements = get_movements(new_tree, next_turn).first;
+			for (auto next_move : next_movements){
+				if (next_move.size() == 2){
+					QCTree next_tree = new_tree;
+					next_tree.propagate(next_move[0], next_move[1]);
+					std::cout<< "Simple move: "<<next_move[0].to_string()<<" "<<next_move[1].to_string()<<std::endl;
+					std::cout << "Score: " << next_tree.score << std::endl;
+				}
+			}
+			std::cout << "--------------------------"<<std::endl;
 		}
 	}
 
@@ -100,23 +109,31 @@ void Game::bot_turn(){
 }
 
 
-void Game::get_movements(std::string turn_){
-	movements_.clear();
-	collapse_movements_.clear();
+void Game::get_movements(){
+	std::pair<std::vector<std::vector<Tile>>,std::vector<std::vector<Tile>>> movements = get_movements(tree_, turn_);
+	movements_ = movements.first;
+	collapse_movements_ = movements.second;
+}
+
+
+std::pair<std::vector<std::vector<Tile>>,std::vector<std::vector<Tile>>> 
+			Game::get_movements(QCTree tree, std::string turn){
+	std::vector<std::vector<Tile>> movements;
+	std::vector<std::vector<Tile>> collapse_movements;
 
 	for (int i = 0; i < N_ROWS; i++){
 		for (int j = 0; j < N_COLS; j++){
 			Tile source = Tile(i, j);
 
-			if (turn_ == "white" && tree_.q_board.isWhite(source) ||
-					turn_ == "black" && tree_.q_board.isBlack(source)){
-				std::vector<Tile> validMoves = tree_.q_board.getValidMoves(source);
+			if (turn == "white" && tree.q_board.isWhite(source) ||
+					turn == "black" && tree.q_board.isBlack(source)){
+				std::vector<Tile> validMoves = tree.q_board.getValidMoves(source);
 				
 				if (ALLOW_ENTANGLEMENT){
-					for (Board* board : tree_.get_leaf_boards()){
+					for (Board* board : tree.get_leaf_boards()){
 						for (Tile move : board->getValidMoves(source)){
-							if (tree_.q_board.board_matrix(move.row, move.col) == gap || 
-									tree_.q_board.board_matrix(move.row, move.col) == board->board_matrix(source.row, source.col)){
+							if (tree.q_board.board_matrix(move.row, move.col) == gap || 
+									tree.q_board.board_matrix(move.row, move.col) == board->board_matrix(source.row, source.col)){
 								validMoves.push_back(move);
 							}
 						}
@@ -126,24 +143,24 @@ void Game::get_movements(std::string turn_){
 
 				for (Tile target1 : validMoves){
 					// Check if the move would be a quantum capture
-					if (tree_.pond_matrix(source.row, source.col) != 1.00
-						&& ((turn_=="white" && tree_.q_board.isBlack(target1))
-						|| (turn_=="black" && tree_.q_board.isWhite(target1)))){
+					if (tree.pond_matrix(source.row, source.col) != 1.00
+						&& ((turn=="white" && tree.q_board.isBlack(target1))
+						|| (turn=="black" && tree.q_board.isWhite(target1)))){
 							
-						collapse_movements_.push_back({source, target1});
+						collapse_movements.push_back({source, target1});
 						continue;
 					} else {
 						// Get simple moves
-						movements_.push_back({source, target1});
+						movements.push_back({source, target1});
 					}
 
 					// Get split moves only to gap targets
-					if (tree_.q_board.board_matrix(target1.row, target1.col) != gap){
+					if (tree.q_board.board_matrix(target1.row, target1.col) != gap){
 						continue;
 					}
 					for (Tile target2 : validMoves){
-						if (!(target1==target2) && tree_.q_board.board_matrix(target2.row, target2.col) == gap){
-							movements_.push_back({source, target1, target2});
+						if (!(target1==target2) && tree.q_board.board_matrix(target2.row, target2.col) == gap){
+							movements.push_back({source, target1, target2});
 						}
 					}
 				}
@@ -151,7 +168,9 @@ void Game::get_movements(std::string turn_){
 		}
 	}
 
+	return {movements, collapse_movements};
 }
+
 
 int main(int argc, char * argv[])
 {

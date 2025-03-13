@@ -28,7 +28,9 @@ class Game {
 
         void human_turn();
         void bot_turn();
-        void get_movements(std::string turn);
+        void get_movements();
+        std::pair<std::vector<std::vector<Tile>>,std::vector<std::vector<Tile>>> 
+                get_movements(QCTree tree, std::string turn);
 
         void print_interface(){
             interface_->loadBoard();
