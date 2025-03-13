@@ -14,7 +14,7 @@ class Game {
         int N_COLS;
         std::string turn_ = "white";
         std::string WHITE_PLAYER = "human";
-        std::string BLACK_PLAYER = "human";
+        std::string BLACK_PLAYER = "bot";
 
 	    QCTree tree_;
         Interface* interface_;
@@ -28,6 +28,7 @@ class Game {
 
         void human_turn();
         void bot_turn();
+        std::vector<Tile> explore_tree(QCTree tree, int depth, std::string turn);
         void get_movements();
         std::pair<std::vector<std::vector<Tile>>,std::vector<std::vector<Tile>>> 
                 get_movements(QCTree tree, std::string turn);

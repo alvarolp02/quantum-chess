@@ -86,26 +86,33 @@ void Game::human_turn(){
 
 void Game::bot_turn(){
 
-	// tree_.propagate(movements_[0][0], movements_[0][1]);
-	for (auto move : movements_){
-		if (move.size() == 2){
-			QCTree new_tree = tree_;
-			new_tree.propagate(move[0], move[1]);
-			std::string next_turn = turn_ == "white" ? "black" : "white";
-			auto next_movements = get_movements(new_tree, next_turn).first;
-			for (auto next_move : next_movements){
-				if (next_move.size() == 2){
-					QCTree next_tree = new_tree;
-					next_tree.propagate(next_move[0], next_move[1]);
-					std::cout<< "Simple move: "<<next_move[0].to_string()<<" "<<next_move[1].to_string()<<std::endl;
-					std::cout << "Score: " << next_tree.score << std::endl;
-				}
-			}
-			std::cout << "--------------------------"<<std::endl;
-		}
-	}
+	auto best_move = explore_tree(tree_, 2, turn_);
+	tree_.propagate(best_move[0], best_move[1]);
+	std::cout<< "Bot move: "<<best_move[0].to_string()<<" "<<best_move[1].to_string()<<std::endl;
 
 	turn_ = turn_ == "white" ? "black" : "white";
+}
+
+std::vector<Tile> Game::explore_tree(QCTree tree, int depth, std::string turn){
+	std::vector<Tile> best_move;
+	double best_score = 1000;
+	for (auto move : get_movements(tree, turn).first){
+		if (move.size() == 2){
+			QCTree new_tree = tree;
+			new_tree.propagate(move[0], move[1]);
+			double score = new_tree.score;
+			if (depth > 0){
+				std::vector<Tile> next_move = explore_tree(new_tree, depth-1, turn == "white" ? "black" : "white");
+				new_tree.propagate(next_move[0], next_move[1]);
+				score = new_tree.score;
+			}
+			if (score < best_score){
+				best_score = score;
+				best_move = move;
+			}
+		}
+	}
+	return best_move;
 }
 
 
