@@ -1,194 +1,154 @@
+#include "quantum_chess/game.hpp"
 #include "interface.cpp"
-#include "quantum_chess/qc_tree.hpp"
-#include "quantum_chess/board.hpp"
-#include "quantum_chess/qc_node.hpp"
-#include "quantum_chess/utils.hpp"
-#include <thread>
-#include <random>
-#include <filesystem>
-#include <yaml-cpp/yaml.h>
 
-bool ALLOW_ENTANGLEMENT = true;
+Game::Game(const std::string& config_file = ""){
+	N_ROWS=8;
+	N_COLS=8;
+	if (config_file != ""){
+		Eigen::MatrixXi board_matrix = load_config(config_file);
+		tree_ = QCTree(board_matrix);
+		N_ROWS = board_matrix.rows();
+		N_COLS = board_matrix.cols();
+	} else {
+		tree_ = QCTree();
+	}
 
-void print_interface(Interface* interface, QCTree* tree){
-  interface->loadBoard();
-  interface->loadPieces(tree->q_board.board_matrix);
-  interface->loadPonderation(tree->pond_matrix);
-  interface->window.display();
-}
+	interface_ = new Interface(N_ROWS, N_COLS);
 
-void print_interface(Interface* interface, QCTree* tree, std::vector<Tile> movements){
-  interface->loadBoard();
-  interface->loadPieces(tree->q_board.board_matrix);
-  interface->loadPonderation(tree->pond_matrix);
-  interface->loadMovements(movements);
-  interface->window.display();
-}
+	std::thread thread_0(&Interface::openWindow, interface_); 
+	turn_ = "white";
 
-Eigen::MatrixXi load_config(const std::string& filename){
-  YAML::Node config = YAML::LoadFile(filename);
-  std::map<char, int> pieceToInt = {
-    {'.', 0},  {'P', 1},  {'R', 2},  {'N', 3},  {'B', 4}, {'Q', 5},  {'K', 6},
-    {'p', 7}, {'r', 8}, {'n', 9}, {'b', 10}, {'q', 11}, {'k', 12} };
+	print_interface();
 
+	while(true){
 
-  auto values = config["board"];
-  
-  int n = values.size();
-  int m = values[0].size();
+		get_movements(turn_);
 
-  Eigen::MatrixXi matrix = Eigen::MatrixXi::Zero(n, m);
-
-
-  for (int i = 0; i < n; ++i) {
-      for (int j = 0; j < m; ++j) {
-        matrix(i, j) = pieceToInt[values[i][j].as<char>()];
-      }
-  }
-
-  return matrix;
+		if ((turn_=="white" && WHITE_PLAYER=="human") || (turn_=="black" && BLACK_PLAYER=="human")){
+			human_turn();
+		} else if ((turn_=="white" && WHITE_PLAYER=="bot") || (turn_=="black" && BLACK_PLAYER=="bot")){
+			bot_turn();
+		}
+		
+	}
+	
+	thread_0.join();
 
 }
 
+
+void Game::human_turn(){
+	std::vector<Tile> inputs = interface_->waitForInput();
+
+	if (selected_piece_.row!=-1 && inputs.size()==1 && contains(movements_, {selected_piece_, inputs[0]})){
+		Tile target = inputs[0];
+		tree_.propagate(selected_piece_, target);
+		std::cout<< "Simple move: "<<selected_piece_.to_string()<<" "<<target.to_string()<<std::endl;
+		turn_ = turn_ == "white" ? "black" : "white";
+		tree_.print_tree();
+		print_interface();
+		selected_piece_ = Tile(-1, -1);
+	} else if (selected_piece_.row!=-1 && inputs.size()==1 && contains(collapse_movements_, {selected_piece_, inputs[0]})){
+		Tile target = inputs[0];
+		tree_.collapse(selected_piece_);
+		// If the piece is real, capture the target
+		if(tree_.q_board.board_matrix(selected_piece_.row, selected_piece_.col) != 0.0){
+			tree_.propagate(selected_piece_, target);
+			std::cout<< "Collapse move: "<<selected_piece_.to_string()<<" "<<target.to_string()<<std::endl;
+		}
+		tree_.print_tree();
+		turn_ = turn_ == "white" ? "black" : "white";
+		print_interface();
+		selected_piece_ = Tile(-1, -1);
+	} else if (selected_piece_.row!=-1 && inputs.size()==2 && contains(movements_, {selected_piece_, inputs[0], inputs[1]})){
+		Tile target1 = inputs[0];
+		Tile target2 = inputs[1];
+		tree_.split(selected_piece_, target1, target2);
+		std::cout<<"Split move: "<<selected_piece_.to_string()<<" "<< 
+			target1.to_string()<<" "<<target2.to_string()<<std::endl;
+		tree_.print_tree();
+		turn_ = turn_ == "white" ? "black" : "white";
+		print_interface();
+		selected_piece_ = Tile(-1, -1);
+	} else if (inputs.size()==1){
+		selected_piece_ = inputs[0];
+		std::vector<Tile> selected_moves;
+		for (std::vector<Tile> move : movements_) {
+			if (move[0] == selected_piece_) selected_moves.push_back(move[1]);
+		}
+		for (std::vector<Tile> move : collapse_movements_) {
+			if (move[0] == selected_piece_) selected_moves.push_back(move[1]);
+		}
+		print_interface(selected_moves);
+	}
+}
+
+
+void Game::bot_turn(){
+	return;
+}
+
+
+void Game::get_movements(std::string turn_){
+	movements_.clear();
+	collapse_movements_.clear();
+
+	for (int i = 0; i < N_ROWS; i++){
+		for (int j = 0; j < N_COLS; j++){
+			Tile source = Tile(i, j);
+
+			if (turn_ == "white" && tree_.q_board.isWhite(source) ||
+					turn_ == "black" && tree_.q_board.isBlack(source)){
+				std::vector<Tile> validMoves = tree_.q_board.getValidMoves(source);
+				
+				if (ALLOW_ENTANGLEMENT){
+					for (Board* board : tree_.get_leaf_boards()){
+						for (Tile move : board->getValidMoves(source)){
+							if (tree_.q_board.board_matrix(move.row, move.col) == gap || 
+									tree_.q_board.board_matrix(move.row, move.col) == board->board_matrix(source.row, source.col)){
+								validMoves.push_back(move);
+							}
+						}
+					}
+				}
+				
+
+				for (Tile target1 : validMoves){
+					// Check if the move would be a quantum capture
+					if (tree_.pond_matrix(source.row, source.col) != 1.00
+						&& ((turn_=="white" && tree_.q_board.isBlack(target1))
+						|| (turn_=="black" && tree_.q_board.isWhite(target1)))){
+							
+						collapse_movements_.push_back({source, target1});
+						continue;
+					} else {
+						// Get simple moves
+						movements_.push_back({source, target1});
+					}
+
+					// Get split moves only to gap targets
+					if (tree_.q_board.board_matrix(target1.row, target1.col) != gap){
+						continue;
+					}
+					for (Tile target2 : validMoves){
+						if (!(target1==target2) && tree_.q_board.board_matrix(target2.row, target2.col) == gap){
+							movements_.push_back({source, target1, target2});
+						}
+					}
+				}
+			} 
+		}
+	}
+
+}
 
 int main(int argc, char * argv[])
 {
-  QCTree tree;
-  int rows=8;
-  int cols=8;
-  if (argc == 2){
-    Eigen::MatrixXi board_matrix = load_config(std::string("../") + argv[1]);
-    tree = QCTree(board_matrix);
-    rows = board_matrix.rows();
-    cols = board_matrix.cols();
-  } else {
-    tree = QCTree();
-  }
+	if (argc == 2){
+		Game(std::string("../") + argv[1]);
+	} else {
+		Game();
+	}
 
-  Interface interface(rows, cols);
-
-  std::thread thread_0(&Interface::openWindow, &interface); 
-  std::string turn = "white";
-
-  tree.get_ponderated_board();
-  print_interface(&interface, &tree);
-
-  std::vector<Tile> movements;
-  Tile selectedPiece;
-
-  while(true){
-
-      std::vector<Tile> inputs = interface.waitForInput();
-
-      //If left click, the input is either a simple move or selecting a piece
-      if (inputs.size() == 1) {
-        Tile input = inputs[0];
-
-        //Check if the input is a valid move
-        if (contains(movements, input)) {
-
-          Tile target = input;
-          
-          std::cout << tree.pond_matrix << std::endl;
-          bool source_is_quantum = tree.pond_matrix(selectedPiece.row, selectedPiece.col) != 1.00;
-          bool target_occupied = tree.q_board.board_matrix(target.row, target.col) != gap
-                  && tree.q_board.board_matrix(target.row, target.col) != tree.q_board.board_matrix(selectedPiece.row, selectedPiece.col);
-          
-          // If a quantum piece is used to capture an occupied tile, collapse the piece
-          if(source_is_quantum && target_occupied){
-            tree.collapse(selectedPiece);
-            tree.get_ponderated_board();
-
-            // If the piece is real, capture the target
-            if(tree.q_board.board_matrix(selectedPiece.row, selectedPiece.col) != 0){
-              tree.propagate(selectedPiece, target);
-              std::cout<< "Move: "<<selectedPiece.to_string()<<" "<<target.to_string()<<std::endl;
-            }
-
-          // In other cases, just move the piece
-          } else {
-            tree.propagate(selectedPiece, target);
-            std::cout<< "Move: "<<selectedPiece.to_string()<<" "<<target.to_string()<<std::endl;
-          }
-
-          tree.print_tree();
-          tree.get_ponderated_board();
-
-          print_interface(&interface, &tree);
-          turn = turn == "white" ? "black" : "white"; 
-          movements.clear();
-          Tile selectedPiece;
-          continue;
-
-        } else { // The input is not a move
-
-          //Check if the input is a selecting a valid piece
-          if (turn == "white" && tree.q_board.isWhite(input) == false) {
-            continue;
-          } else if (turn == "black" && tree.q_board.isBlack(input) == false) {
-            continue;
-          }
-
-          tree.get_ponderated_board();
-
-
-          if (ALLOW_ENTANGLEMENT){
-            // If entanglement is allowed, get all valid non-capture moves on any possible board
-            movements.clear();
-            for (Board* board : tree.get_leaf_boards()){
-              std::vector<Tile> validMoves = board->getValidMoves(input);
-              for (Tile move : validMoves){
-                if (tree.q_board.board_matrix(move.row, move.col) == gap || 
-                      tree.q_board.board_matrix(move.row, move.col) == board->board_matrix(input.row, input.col)){
-                  movements.push_back(move);
-                }
-              }
-            }
-            std::vector<Tile> validCaptures = tree.q_board.getValidMoves(input);
-            movements.insert(movements.end(), validCaptures.begin(), validCaptures.end());
-          } else {
-            // If entanglement is not allowed, get only moves allowed on all boards simultaneously
-            movements = tree.q_board.getValidMoves(input);
-          }
-
-
-          print_interface(&interface, &tree, movements);
-
-          selectedPiece = input;
-        }
-        
-      } else if (inputs.size() == 2){ // If right click, the input is a quantum move
-        Tile target1 = inputs[0];
-        Tile target2 = inputs[1];
-
-
-        // Check both movements are valid and the target tiles are empty
-        bool target1_ok = contains(movements, target1) 
-                            && tree.q_board.board_matrix(target1.row, target1.col) == gap;
-        bool target2_ok = contains(movements, target2)
-                            && tree.q_board.board_matrix(target2.row, target2.col) == gap;
-
-        
-        if (target1_ok && target2_ok && !(target1==target2)) {
-
-          tree.split(selectedPiece, target1, target2);
-          std::cout<<"Split: "<<selectedPiece.to_string()<<" "<< 
-                target1.to_string()<<" "<<target2.to_string()<<std::endl;
-
-          tree.print_tree();
-          tree.get_ponderated_board();
-          print_interface(&interface, &tree);
-          turn = turn == "white" ? "black" : "white"; 
-          movements.clear();
-          Tile selectedPiece;
-          continue;
-        }
-        
-      }
-
-  }
-  
-  thread_0.join();
-
-  return 0;
+  	return 0;
 }

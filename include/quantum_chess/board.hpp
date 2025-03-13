@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include "structs.hpp"
 #include "utils.hpp"
+#include <map>
 
 #define gap 0
 #define w_pawn 1
@@ -26,6 +27,20 @@ class Board {
         Eigen::MatrixXi board_matrix;
         int N_ROWS;
         int N_COLS;
+        std::map<int, double> piece_values = {
+            {w_pawn, 1.0},
+            {w_rook, 5.0},
+            {w_knight, 3.0},
+            {w_bishop, 3.0},
+            {w_queen, 9.0},
+            {w_king, 100.0},
+            {b_pawn, -1.0},
+            {b_rook, -5.0},
+            {b_knight, -3.0},
+            {b_bishop, -3.0},
+            {b_queen, -9.0},
+            {b_king, -100.0}
+        };
 
         Board() {
             // Initialize the board to be gap
@@ -58,6 +73,10 @@ class Board {
                 return false;
             }
         }
+
+        double get_score(int row, int col){
+            return piece_values[board_matrix(row, col)];
+        }
         
         void printBoard() {
             std::cout << board_matrix << std::endl;
@@ -70,7 +89,19 @@ class Board {
         bool isBlack(Tile t) {
             return board_matrix(t.row, t.col) >= 7;
         }
+
+        bool isWhite(int row, int col) {
+            return board_matrix(row, col) < 7 && board_matrix(row, col) != gap;
+        }
+
+        bool isBlack(int row, int col) {
+            return board_matrix(row, col) >= 7;
+        }
         
+        std::vector<Tile> getValidMoves(int row, int col) {
+            return getValidMoves(Tile(row, col));
+        }
+
         std::vector<Tile> getValidMoves(Tile t) {
             int piece = board_matrix(t.row, t.col);
         
