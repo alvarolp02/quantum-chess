@@ -29,6 +29,8 @@ class Game {
         void human_turn();
         void bot_turn();
         std::vector<Tile> explore_tree(QCTree tree, int depth, std::string turn);
+        std::vector<Tile> alpha_beta(QCTree tree, int depth, double alpha, double beta,
+                                        std::string turn, std::vector<Tile> prev_move);
         void get_movements();
         std::pair<std::vector<std::vector<Tile>>,std::vector<std::vector<Tile>>> 
                 get_movements(QCTree tree, std::string turn);
