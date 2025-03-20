@@ -32,7 +32,7 @@ Game::Game(const std::string& config_file = ""){
 		
 	}
 	
-	thread_0.join();
+	thread_0.detach();
 
 }
 
