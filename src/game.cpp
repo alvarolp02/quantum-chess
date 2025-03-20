@@ -16,6 +16,9 @@ Game::Game(const std::string& config_file = ""){
 	}
 
 	interface_ = new Interface(N_ROWS, N_COLS);
+	if (WHITE_PLAYER=="bot" && BLACK_PLAYER=="bot"){
+		interface_->BOT = true;
+	}
 
 	std::thread thread_0(&Interface::openWindow, interface_); 
 	turn_ = "white";
@@ -93,7 +96,7 @@ void Game::bot_turn(){
 
 	std::vector<Tile> best_move;
 	double eval = alpha_beta(tree_, MAX_DEPTH, -1000, 1000, turn_, best_move);
-	
+
 	tree_.propagate(best_move[0], best_move[1]);
 	std::cout<< "Bot move: "<<best_move[0].to_string()<<" "<<best_move[1].to_string()<<std::endl;
 
