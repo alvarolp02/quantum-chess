@@ -1,6 +1,8 @@
 #include "quantum_chess/game.hpp"
 #include "interface.cpp"
 
+int MAX_DEPTH = 5;
+
 Game::Game(const std::string& config_file = ""){
 	N_ROWS=8;
 	N_COLS=8;
@@ -88,7 +90,10 @@ void Game::bot_turn(){
 
 	// auto best_move = explore_tree(tree_, 2, turn_);
 	std::cout<<"Bot is thinking..."<<std::endl;
-	auto best_move = alpha_beta(tree_, 4, -1000, 1000, turn_, {});
+
+	std::vector<Tile> best_move;
+	double eval = alpha_beta(tree_, MAX_DEPTH, -1000, 1000, turn_, best_move);
+	
 	tree_.propagate(best_move[0], best_move[1]);
 	std::cout<< "Bot move: "<<best_move[0].to_string()<<" "<<best_move[1].to_string()<<std::endl;
 
@@ -119,54 +124,63 @@ std::vector<Tile> Game::explore_tree(QCTree tree, int depth, std::string turn){
 	return best_move;
 }
 
-std::vector<Tile> Game::alpha_beta(QCTree tree, int depth, double alpha, double beta, 
-									std::string turn, std::vector<Tile> prev_move) {
-	std::vector<Tile> best_move;
 
-	if (depth == 0) {
-		return prev_move;
-	}
+double Game::alpha_beta(QCTree tree, int depth, double alpha, double beta, 
+                         std::string turn, std::vector<Tile>& best_move) {
+    if (depth == 0) {
+        return tree.score; 
+    }
 
-	if (turn == "white") { // Maximizing player
-		double maxEval = -1000;
-		for (auto move : get_movements(tree, turn).first) {
-			if (move.size() == 2) {
-				QCTree new_tree = tree;
-				new_tree.propagate(move[0], move[1]);
-				std::vector<Tile> next_move = alpha_beta(new_tree, depth - 1, alpha, beta, "black", move);
-				new_tree.propagate(next_move[0], next_move[1]);
-				double eval = new_tree.score;
-				if (eval > maxEval) {
-					maxEval = eval;
-					best_move = move;
-				}
-				alpha = std::max(alpha, eval);
-				if (beta <= alpha) {
-					break;
-				}
-			}
-		}
-	} else { // Minimizing player
-		double minEval = 1000;
-		for (auto move : get_movements(tree, turn).first) {
-			if (move.size() == 2) {
-				QCTree new_tree = tree;
-				new_tree.propagate(move[0], move[1]);
-				std::vector<Tile> next_move = alpha_beta(new_tree, depth - 1, alpha, beta, "white", move);
-				new_tree.propagate(next_move[0], next_move[1]);
-				double eval = new_tree.score;
-				if (eval < minEval) {
-					minEval = eval;
-					best_move = move;
-				}
-				beta = std::min(beta, eval);
-				if (beta <= alpha) {
-					break;
-				}
-			}
-		}
-	}
-	return best_move;
+    if (turn == "white") { // Maximizing player
+        double maxEval = -1000;
+
+        for (auto move : get_movements(tree, turn).first) {
+            if (move.size() == 2) {
+                QCTree new_tree = tree;
+                new_tree.propagate(move[0], move[1]);
+
+                double eval = alpha_beta(new_tree, depth - 1, alpha, beta, "black", best_move);
+
+                if (eval > maxEval) {
+                    maxEval = eval;
+                    if (depth == MAX_DEPTH) { 
+                        best_move = move;
+                    }
+                }
+
+                alpha = std::max(alpha, eval);
+                if (beta <= alpha) {
+                    break; // beta pruning
+                }
+            }
+        }
+        return maxEval;
+
+    } else { // Minimizing player
+        double minEval = 1000;
+
+        for (auto move : get_movements(tree, turn).first) {
+            if (move.size() == 2) {
+                QCTree new_tree = tree;
+                new_tree.propagate(move[0], move[1]);
+
+                double eval = alpha_beta(new_tree, depth - 1, alpha, beta, "white", best_move);
+
+                if (eval < minEval) {
+                    minEval = eval;
+                    if (depth == MAX_DEPTH) {
+                        best_move = move;
+                    }
+                }
+
+                beta = std::min(beta, eval);
+                if (beta <= alpha) {
+                    break; // alpha pruning
+                }
+            }
+        }
+        return minEval;
+    }
 }
 
 

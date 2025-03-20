@@ -18,7 +18,7 @@ struct Tile {
     }
 
     std::string to_string(){
-        return letters[col] + std::to_string(8-row);
+        return letters[col] + std::to_string(row);
     }
 };
 
