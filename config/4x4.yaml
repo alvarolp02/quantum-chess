@@ -1,0 +1,5 @@
+board:
+  - [r, p, k, r]
+  - [p, p, p, p]
+  - [P, P, P, P]
+  - [R, K, Q, R]

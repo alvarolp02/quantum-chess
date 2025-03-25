@@ -48,19 +48,39 @@ class Board {
             N_COLS = 8;
             board_matrix = Eigen::MatrixXi::Zero(8, 8);
             board_matrix << b_rook,b_knight,b_bishop,b_queen,b_king,b_bishop,b_knight,b_rook,
-                    b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,
-                    gap,gap,gap,gap,gap,gap,gap,gap,
-                    gap,gap,gap,gap,gap,gap,gap,gap,
-                    gap,gap,gap,gap,gap,gap,gap,gap,
-                    gap,gap,gap,gap,gap,gap,gap,gap,
-                    w_pawn,w_pawn,w_pawn,w_pawn,w_pawn,w_pawn,w_pawn,w_pawn,
-                    w_rook,w_knight,w_bishop,w_queen,w_king,w_bishop,w_knight,w_rook;
+                            b_pawn, b_pawn, b_pawn, b_pawn, b_pawn, b_pawn, b_pawn, b_pawn,
+                            gap,    gap,    gap,    gap,    gap,    gap,    gap,    gap,
+                            gap,    gap,    gap,    gap,    gap,    gap,    gap,    gap,
+                            gap,    gap,    gap,    gap,    gap,    gap,    gap,    gap,
+                            gap,    gap,    gap,    gap,    gap,    gap,    gap,    gap,
+                            w_pawn, w_pawn, w_pawn, w_pawn, w_pawn, w_pawn, w_pawn, w_pawn,
+                            w_rook,w_knight,w_bishop,w_queen,w_king,w_bishop,w_knight,w_rook;
         }
 
         Board(Eigen::MatrixXi matrix) {
             N_ROWS = matrix.rows();
             N_COLS = matrix.cols();
             board_matrix = matrix;
+        }
+
+        ~Board() {}
+        
+        // Deep copy constructor
+        Board(const Board& other) 
+            : N_ROWS(other.N_ROWS), N_COLS(other.N_COLS), board_matrix(other.board_matrix) {
+            // Deep copy map because it is a pointer internally
+            piece_values = other.piece_values;
+        }
+
+        // Deep copy assignment operator
+        Board& operator=(const Board& other) {
+            if (this != &other) {  
+                N_ROWS = other.N_ROWS;
+                N_COLS = other.N_COLS;
+                board_matrix = other.board_matrix;  
+                piece_values = other.piece_values;  
+            }
+            return *this;
         }
         
         bool movePiece(Tile source, Tile target) {

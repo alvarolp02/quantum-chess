@@ -11,6 +11,7 @@ class Interface {
         int TILE_SIZE = 100;
         int N_ROWS;
         int N_COLS;
+        bool BOT;
 
         sf::RenderWindow window;
 

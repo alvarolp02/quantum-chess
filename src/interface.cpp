@@ -6,6 +6,7 @@
 Interface::Interface() {
     N_ROWS = 8;
     N_COLS = 8;
+    BOT = false;
 
     window.create(sf::VideoMode(TILE_SIZE * N_COLS, TILE_SIZE * N_ROWS), "Tablero de Ajedrez");
 }
@@ -19,6 +20,13 @@ Interface::Interface(int rows, int cols) {
 
 void Interface::openWindow() {
     while (window.isOpen()) {
+        if (BOT) {
+            sf::Event event;
+            while (window.pollEvent(event)) {
+                if (event.type == sf::Event::Closed)
+                    window.close();
+            }
+        }
     }
 }
 

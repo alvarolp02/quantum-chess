@@ -12,8 +12,8 @@ class QCTree {
         Eigen::MatrixXd pond_matrix;
         Board q_board;
         int depth;
-        std::vector<Split*> splits;
-        QCNode* root;
+        std::vector<std::shared_ptr<Split>> splits;
+        std::shared_ptr<QCNode> root;
         int N_ROWS;
         int N_COLS;
         double score;
@@ -24,11 +24,59 @@ class QCTree {
             score = 0.0;
             this->q_board = Board(Eigen::MatrixXi::Zero(N_ROWS, N_COLS));
             this->depth = 0;
-            this->root = new QCNode(Board(),0);
+            this->root = std::make_shared<QCNode>(std::make_shared<Board>(), 0);
 
             std::srand(std::time(nullptr)); // use current time as seed for random generator
             this->get_ponderated_board();
             this->compute_tree_score();
+        }
+
+        // Deep copy constructor
+        QCTree(const QCTree& other): pond_matrix(other.pond_matrix), q_board(other.q_board), depth(other.depth),
+                            N_ROWS(other.N_ROWS), N_COLS(other.N_COLS), score(other.score), root(nullptr) {
+            // Deep copy splits 
+            splits.reserve(other.splits.size());
+            for (auto s : other.splits) {
+                if (s != nullptr)
+                    splits.push_back(std::make_shared<Split>(*s));
+                else
+                    splits.push_back(nullptr);
+            }
+            // Deep copy root
+            if (other.root != nullptr)
+                root = std::make_shared<QCNode>(*other.root);
+        }
+
+        // Deep copy assignment operator
+        QCTree& operator=(const QCTree& other) {
+            if (this == &other)
+                return *this; // Avoid self-assignment
+            
+            pond_matrix = other.pond_matrix;
+            q_board = other.q_board;
+            depth = other.depth;
+            N_ROWS = other.N_ROWS;
+            N_COLS = other.N_COLS;
+            score = other.score;
+
+            // Deep copy splits
+            splits.reserve(other.splits.size());
+            for (auto s : other.splits) {
+                if (s != nullptr)
+                    splits.push_back(std::make_shared<Split>(*s));
+                else
+                    splits.push_back(nullptr);
+            }
+
+            // Deep copy root
+            if (other.root != nullptr)
+                root = std::make_shared<QCNode>(*other.root);
+
+            return *this;
+        }
+
+        // Destructor
+        ~QCTree() {
         }
         
         QCTree(Eigen::MatrixXi matrix){
@@ -36,7 +84,7 @@ class QCTree {
             N_COLS = matrix.cols();
             this->q_board = Board(Eigen::MatrixXi::Zero(N_ROWS, N_COLS));
             this->depth = 0;
-            this->root = new QCNode(Board(matrix),0);
+            this->root = std::make_shared<QCNode>(std::make_shared<Board>(matrix), 0);
 
             std::srand(std::time(nullptr)); // use current time as seed for random generator
             this->get_ponderated_board();
@@ -47,7 +95,7 @@ class QCTree {
             // Move the piece in all leaf nodes and store wether the move was possible or not
             std::vector<bool> moves_result = {};
             int sum = 0;
-            for (Board* board : get_leaf_boards()){
+            for (std::shared_ptr<Board> board : get_leaf_boards()){
                 moves_result.push_back(board->movePiece(source, target));
                 sum += int(moves_result.back());
             }
@@ -62,7 +110,7 @@ class QCTree {
 
                 // Get actual depths list
                 std::vector <int> depths = {this->root->index};
-                QCNode* node = this->root;
+                std::shared_ptr<QCNode> node = this->root;
                 while (node->left != nullptr && node->right != nullptr){
                     depths.push_back(node->left->index);
                     node = node->left;
@@ -105,7 +153,7 @@ class QCTree {
         
             // Update splits positions
             for (int i = 0; i < this->splits.size(); ++i) {
-                Split* s = this->splits[i];
+                std::shared_ptr<Split> s = this->splits[i];
                 for (int j = 0; j < s->pieces.size(); ++j) {
                     if(s->pieces[j] == source){
                         // If the target is not in the split, update the source position
@@ -134,7 +182,7 @@ class QCTree {
             Tile t2 = target2;
             
             bool nested_split = false;
-            for (Split* split : splits){
+            for (std::shared_ptr<Split> split : splits){
                 if(contains(split->pieces, source)){
                     split->depths.push_back(this->depth);
                     split->pieces.erase(std::remove(split->pieces.begin(), split->pieces.end(), source), split->pieces.end());
@@ -147,7 +195,7 @@ class QCTree {
             }
             
             if (!nested_split){
-                Split* s = new Split();
+                std::shared_ptr<Split> s = std::make_shared<Split>();
                 s->depths = {this->depth};
                 s->pieces = {t1, t2};
                 this->splits.push_back(s);
@@ -178,13 +226,13 @@ class QCTree {
                             if (random_boolean){
                                 delete_node(node->right); 
                                 node->index = node->left->index;
-                                node->board = node->left->board;
+                                node->board = std::make_shared<Board>(node->left->board->board_matrix);
                                 node->right = node->left->right;
                                 node->left = node->left->left;
                             }else{
                                 delete_node(node->left); 
                                 node->index = node->right->index;
-                                node->board = node->right->board;
+                                node->board = std::make_shared<Board>(node->right->board->board_matrix);
                                 node->left = node->right->left;
                                 node->right = node->right->right;
                             }
@@ -202,10 +250,10 @@ class QCTree {
 
 
 
-        std::vector<Board*> get_leaf_boards(){
-            std::vector<Board*> leaf_boards = {};
+        std::vector<std::shared_ptr<Board>> get_leaf_boards(){
+            std::vector<std::shared_ptr<Board>> leaf_boards = {};
             for (auto node : get_nodes_at_depth(this->depth)){
-                leaf_boards.push_back(&(node->board));
+                leaf_boards.push_back((node->board));
             }
             return leaf_boards;
         }
@@ -221,7 +269,7 @@ class QCTree {
 
     private: 
 
-        void print_tree_aux(QCNode* node, std::string prefix){
+        void print_tree_aux(std::shared_ptr<QCNode> node, std::string prefix){
             if(node==nullptr){
                 return;
             }
@@ -238,22 +286,22 @@ class QCTree {
         }
 
         // Delete node and all its children
-        void delete_node(QCNode* node){
+        void delete_node(std::shared_ptr<QCNode> node){
             if(node == nullptr){
                 return;
             }
             delete_node(node->left);
             delete_node(node->right);
-            
-            delete node;
+    
+            node = nullptr;
         }
 
-        std::vector<QCNode*> get_nodes_at_depth(int depth){
-            std::vector<QCNode*> nodes = get_nodes_at_depth_aux(this->root, depth, {});
+        std::vector<std::shared_ptr<QCNode>> get_nodes_at_depth(int depth){
+            std::vector<std::shared_ptr<QCNode>> nodes = get_nodes_at_depth_aux(this->root, depth, {});
             return nodes;
         }
         
-        std::vector<QCNode*> get_nodes_at_depth_aux(QCNode* node, int depth, std::vector<QCNode*> acum){
+        std::vector<std::shared_ptr<QCNode>> get_nodes_at_depth_aux(std::shared_ptr<QCNode> node, int depth, std::vector<std::shared_ptr<QCNode>> acum){
             if(node==nullptr){
                 return acum;
             }
@@ -274,7 +322,7 @@ class QCTree {
         void get_ponderated_board(){
             std::vector<Eigen::MatrixXi> boards = {};
             for(auto node : get_nodes_at_depth(this->depth)){
-                boards.push_back(node->board.board_matrix);
+                boards.push_back(node->board->board_matrix);
             }
             int n_boards = boards.size();
         
