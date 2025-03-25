@@ -12,8 +12,8 @@ class QCTree {
         Eigen::MatrixXd pond_matrix;
         Board q_board;
         int depth;
-        std::vector<std::shared_ptr<Split>> splits; // Usamos shared_ptr en lugar de raw pointers
-        std::shared_ptr<QCNode> root;  // Usamos shared_ptr en lugar de raw pointer
+        std::vector<std::shared_ptr<Split>> splits;
+        std::shared_ptr<QCNode> root;
         int N_ROWS;
         int N_COLS;
         double score;
@@ -24,7 +24,7 @@ class QCTree {
             score = 0.0;
             this->q_board = Board(Eigen::MatrixXi::Zero(N_ROWS, N_COLS));
             this->depth = 0;
-            this->root = std::make_shared<QCNode>(std::make_shared<Board>(), 0);  // Usamos make_shared
+            this->root = std::make_shared<QCNode>(std::make_shared<Board>(), 0);
 
             std::srand(std::time(nullptr)); // use current time as seed for random generator
             this->get_ponderated_board();
@@ -38,13 +38,13 @@ class QCTree {
             splits.reserve(other.splits.size());
             for (auto s : other.splits) {
                 if (s != nullptr)
-                    splits.push_back(std::make_shared<Split>(*s)); // Usamos make_shared
+                    splits.push_back(std::make_shared<Split>(*s));
                 else
                     splits.push_back(nullptr);
             }
             // Deep copy root
             if (other.root != nullptr)
-                root = std::make_shared<QCNode>(*other.root);  // Usamos make_shared
+                root = std::make_shared<QCNode>(*other.root);
         }
 
         // Deep copy assignment operator
@@ -63,21 +63,20 @@ class QCTree {
             splits.reserve(other.splits.size());
             for (auto s : other.splits) {
                 if (s != nullptr)
-                    splits.push_back(std::make_shared<Split>(*s)); // Usamos make_shared
+                    splits.push_back(std::make_shared<Split>(*s));
                 else
                     splits.push_back(nullptr);
             }
 
             // Deep copy root
             if (other.root != nullptr)
-                root = std::make_shared<QCNode>(*other.root);  // Usamos make_shared
+                root = std::make_shared<QCNode>(*other.root);
 
             return *this;
         }
 
         // Destructor
         ~QCTree() {
-            // No es necesario eliminar manualmente, shared_ptr maneja la memoria automáticamente
         }
         
         QCTree(Eigen::MatrixXi matrix){
