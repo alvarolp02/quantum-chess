@@ -15,7 +15,7 @@ class Game {
         GameState state_ = Playing;
         std::string turn_ = "white";
         std::string WHITE_PLAYER = "human";
-        std::string BLACK_PLAYER = "bot";
+        std::string BLACK_PLAYER = "human";
 
 	    QCTree tree_;
         Interface* interface_;
