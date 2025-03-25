@@ -62,6 +62,26 @@ class Board {
             N_COLS = matrix.cols();
             board_matrix = matrix;
         }
+
+        ~Board() {}
+        
+        // Deep copy constructor
+        Board(const Board& other) 
+            : N_ROWS(other.N_ROWS), N_COLS(other.N_COLS), board_matrix(other.board_matrix) {
+            // Deep copy map because it is a pointer internally
+            piece_values = other.piece_values;
+        }
+
+        // Deep copy assignment operator
+        Board& operator=(const Board& other) {
+            if (this != &other) {  
+                N_ROWS = other.N_ROWS;
+                N_COLS = other.N_COLS;
+                board_matrix = other.board_matrix;  
+                piece_values = other.piece_values;  
+            }
+            return *this;
+        }
         
         bool movePiece(Tile source, Tile target) {
             auto allowed_moves = this->getValidMoves(source);

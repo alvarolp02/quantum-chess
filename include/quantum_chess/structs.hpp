@@ -37,3 +37,20 @@ struct Split {
         return (depths == other.depths && pieces == other.pieces);
     }
 };
+
+enum GameState {
+    Playing,
+    WhiteWins,
+    BlackWins,
+    Draw
+};
+
+std::string string(GameState state) {
+    switch (state) {
+        case Playing: return "playing";
+        case WhiteWins: return "white_wins";
+        case BlackWins: return "black_wins";
+        case Draw: return "draw";
+        default: return "unknown";
+    }
+}

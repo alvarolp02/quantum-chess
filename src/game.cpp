@@ -25,7 +25,7 @@ Game::Game(const std::string& config_file = ""){
 
 	print_interface();
 
-	while(true){
+	while(state_ == Playing){
 
 		get_movements();
 
@@ -36,8 +36,10 @@ Game::Game(const std::string& config_file = ""){
 		}
 		
 	}
+
+	std::cout << "Game is over. Result: " << string(state_) << std::endl;
 	
-	thread_0.detach();
+	thread_0.join();
 
 }
 
@@ -97,9 +99,14 @@ void Game::bot_turn(){
 	std::vector<Tile> best_move;
 	double eval = alpha_beta(tree_, MAX_DEPTH, -1000, 1000, turn_, best_move);
 
-	tree_.propagate(best_move[0], best_move[1]);
-	std::cout<< "Bot move: "<<best_move[0].to_string()<<" "<<best_move[1].to_string()<<std::endl;
-
+	if (best_move.size()==2){
+		tree_.propagate(best_move[0], best_move[1]);
+		std::cout << "Bot move: "<<best_move[0].to_string()<<" "<<best_move[1].to_string()<<std::endl;
+	}else{
+		std::cout << "No move is found for " << turn_ << " pieces." << std::endl;
+		state_ = Draw;
+	}
+	
 	turn_ = turn_ == "white" ? "black" : "white";
 	tree_.print_tree();
 	print_interface();

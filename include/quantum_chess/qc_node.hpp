@@ -7,7 +7,7 @@ class QCNode {
     public:
 
         int index;
-        Board board;
+        Board* board;
         QCNode* left;
         QCNode* right;
 
@@ -15,7 +15,7 @@ class QCNode {
         QCNode(): index(0), left(nullptr), right(nullptr) {}
 
         // Constructor
-        QCNode(Board B, int index){
+        QCNode(Board* B, int index){
             this->board = B;
             this->index = index;
             this->left = nullptr;
@@ -25,6 +25,8 @@ class QCNode {
         // Deep copy constructor
         QCNode(const QCNode& other): index(other.index), board(other.board),
                                         left(nullptr), right(nullptr) {
+            if (other.board != nullptr)
+                board = new Board(*other.board);
             if (other.left != nullptr)
                 left = new QCNode(*other.left);
             if (other.right != nullptr)
@@ -37,7 +39,10 @@ class QCNode {
                 return *this; // Avoid self-assignment
             clear(); // Free memory
             index = other.index;
-            board = other.board;
+            if (other.board != nullptr)
+                board = new Board(*other.board);
+            else 
+                board = nullptr;
             // Deep copy left subtree
             if (other.left != nullptr)
                 left = new QCNode(*other.left);
@@ -61,10 +66,10 @@ class QCNode {
         // Split all leaf nodes in two
         void split(Tile source, Tile target1, Tile target2){
             if(this->left == nullptr && this->right == nullptr){
-                Board new_board1 = this->board;
-                new_board1.movePiece(source, target1);
-                Board new_board2 = this->board;
-                new_board2.movePiece(source, target2);
+                Board* new_board1 = new Board(this->board->board_matrix);
+                new_board1->movePiece(source, target1);
+                Board* new_board2 = new Board(this->board->board_matrix);
+                new_board2->movePiece(source, target2);
                 this->left = new QCNode(new_board1, this->index+1);
                 this->right = new QCNode(new_board2, this->index+1);
             }else{
@@ -76,10 +81,22 @@ class QCNode {
     private:
         // Free memory
         void clear() {
-            delete left;
-            delete right;
-            left = nullptr;
-            right = nullptr;
+            // if (left != nullptr) {
+            //     std::cout << "Deleting left: " << left << std::endl;
+            //     delete left;
+            //     left = nullptr;
+            // }
+            // if (right != nullptr) {
+            //     std::cout << "Deleting right: " << right << std::endl;
+            //     delete right;
+            //     right = nullptr;
+            // }
+            // if (board != nullptr) {
+            //     std::cout << "Deleting board: " << board << std::endl;
+            //     // abort();
+            //     delete board;
+            //     board = nullptr;
+            // }
         }
         
 };

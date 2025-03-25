@@ -12,6 +12,7 @@ class Game {
     public:
         int N_ROWS;
         int N_COLS;
+        GameState state_ = Playing;
         std::string turn_ = "white";
         std::string WHITE_PLAYER = "human";
         std::string BLACK_PLAYER = "human";

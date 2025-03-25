@@ -24,7 +24,7 @@ class QCTree {
             score = 0.0;
             this->q_board = Board(Eigen::MatrixXi::Zero(N_ROWS, N_COLS));
             this->depth = 0;
-            this->root = new QCNode(Board(),0);
+            this->root = new QCNode(new Board(),0);
 
             std::srand(std::time(nullptr)); // use current time as seed for random generator
             this->get_ponderated_board();
@@ -51,7 +51,7 @@ class QCTree {
         QCTree& operator=(const QCTree& other) {
             if (this == &other)
                 return *this; // Avoid self-assignment
-            clear(); // Free memory
+            // clear(); // Free memory
             pond_matrix = other.pond_matrix;
             q_board = other.q_board;
             depth = other.depth;
@@ -77,7 +77,7 @@ class QCTree {
 
         // Destructor
         ~QCTree() {
-            clear();
+            // clear();
         }
         
         QCTree(Eigen::MatrixXi matrix){
@@ -85,7 +85,7 @@ class QCTree {
             N_COLS = matrix.cols();
             this->q_board = Board(Eigen::MatrixXi::Zero(N_ROWS, N_COLS));
             this->depth = 0;
-            this->root = new QCNode(Board(matrix),0);
+            this->root = new QCNode(new Board(matrix),0);
 
             std::srand(std::time(nullptr)); // use current time as seed for random generator
             this->get_ponderated_board();
@@ -227,13 +227,13 @@ class QCTree {
                             if (random_boolean){
                                 delete_node(node->right); 
                                 node->index = node->left->index;
-                                node->board = node->left->board;
+                                node->board = new Board(node->left->board->board_matrix);
                                 node->right = node->left->right;
                                 node->left = node->left->left;
                             }else{
                                 delete_node(node->left); 
                                 node->index = node->right->index;
-                                node->board = node->right->board;
+                                node->board = new Board(node->right->board->board_matrix);
                                 node->left = node->right->left;
                                 node->right = node->right->right;
                             }
@@ -254,7 +254,7 @@ class QCTree {
         std::vector<Board*> get_leaf_boards(){
             std::vector<Board*> leaf_boards = {};
             for (auto node : get_nodes_at_depth(this->depth)){
-                leaf_boards.push_back(&(node->board));
+                leaf_boards.push_back((node->board));
             }
             return leaf_boards;
         }
@@ -295,6 +295,7 @@ class QCTree {
             delete_node(node->right);
             
             delete node;
+            node = nullptr;
         }
 
         std::vector<QCNode*> get_nodes_at_depth(int depth){
@@ -323,7 +324,7 @@ class QCTree {
         void get_ponderated_board(){
             std::vector<Eigen::MatrixXi> boards = {};
             for(auto node : get_nodes_at_depth(this->depth)){
-                boards.push_back(node->board.board_matrix);
+                boards.push_back(node->board->board_matrix);
             }
             int n_boards = boards.size();
         
@@ -359,17 +360,17 @@ class QCTree {
             this->score = sum;
         } 
 
-         // Método para liberar memoria
+         // Free memory
         void clear() {
-            // Liberar splits
             for (auto s : splits) {
-                delete s;
+                if (s!=nullptr) delete s;
             }
             splits.clear();
 
-            // Liberar root
-            delete root;
-            root = nullptr;
+            if (root != nullptr) {
+                delete root;
+                root = nullptr;
+            }
         }
 
 
