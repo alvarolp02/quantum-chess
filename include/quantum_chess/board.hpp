@@ -48,13 +48,13 @@ class Board {
             N_COLS = 8;
             board_matrix = Eigen::MatrixXi::Zero(8, 8);
             board_matrix << b_rook,b_knight,b_bishop,b_queen,b_king,b_bishop,b_knight,b_rook,
-                    b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,b_pawn,
-                    gap,gap,gap,gap,gap,gap,gap,gap,
-                    gap,gap,gap,gap,gap,gap,gap,gap,
-                    gap,gap,gap,gap,gap,gap,gap,gap,
-                    gap,gap,gap,gap,gap,gap,gap,gap,
-                    w_pawn,w_pawn,w_pawn,w_pawn,w_pawn,w_pawn,w_pawn,w_pawn,
-                    w_rook,w_knight,w_bishop,w_queen,w_king,w_bishop,w_knight,w_rook;
+                            b_pawn, b_pawn, b_pawn, b_pawn, b_pawn, b_pawn, b_pawn, b_pawn,
+                            gap,    gap,    gap,    gap,    gap,    gap,    gap,    gap,
+                            gap,    gap,    gap,    gap,    gap,    gap,    gap,    gap,
+                            gap,    gap,    gap,    gap,    gap,    gap,    gap,    gap,
+                            gap,    gap,    gap,    gap,    gap,    gap,    gap,    gap,
+                            w_pawn, w_pawn, w_pawn, w_pawn, w_pawn, w_pawn, w_pawn, w_pawn,
+                            w_rook,w_knight,w_bishop,w_queen,w_king,w_bishop,w_knight,w_rook;
         }
 
         Board(Eigen::MatrixXi matrix) {

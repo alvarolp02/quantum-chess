@@ -112,27 +112,6 @@ void Game::bot_turn(){
 	print_interface();
 }
 
-std::vector<Tile> Game::explore_tree(QCTree tree, int depth, std::string turn){
-	std::vector<Tile> best_move;
-	double best_score = 1000;
-	for (auto move : get_movements(tree, turn).first){
-		if (move.size() == 2){
-			QCTree new_tree = tree;
-			new_tree.propagate(move[0], move[1]);
-			double score = new_tree.score;
-			if (depth > 0){
-				std::vector<Tile> next_move = explore_tree(new_tree, depth-1, turn == "white" ? "black" : "white");
-				new_tree.propagate(next_move[0], next_move[1]);
-				score = new_tree.score;
-			}
-			if (score < best_score){
-				best_score = score;
-				best_move = move;
-			}
-		}
-	}
-	return best_move;
-}
 
 
 double Game::alpha_beta(QCTree tree, int depth, double alpha, double beta, 
@@ -215,7 +194,7 @@ std::pair<std::vector<std::vector<Tile>>,std::vector<std::vector<Tile>>>
 				std::vector<Tile> validMoves = tree.q_board.getValidMoves(source);
 				
 				if (ALLOW_ENTANGLEMENT){
-					for (Board* board : tree.get_leaf_boards()){
+					for (std::shared_ptr<Board> board : tree.get_leaf_boards()){
 						for (Tile move : board->getValidMoves(source)){
 							if (tree.q_board.board_matrix(move.row, move.col) == gap || 
 									tree.q_board.board_matrix(move.row, move.col) == board->board_matrix(source.row, source.col)){
