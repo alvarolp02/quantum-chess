@@ -34,6 +34,8 @@ Game::Game(const std::string& config_file = ""){
 		} else if ((turn_=="white" && WHITE_PLAYER=="bot") || (turn_=="black" && BLACK_PLAYER=="bot")){
 			bot_turn();
 		}
+
+		check_state();
 		
 	}
 
@@ -41,6 +43,31 @@ Game::Game(const std::string& config_file = ""){
 	
 	thread_0.join();
 
+}
+
+void Game::check_state(){
+	bool white_king = false;
+	bool black_king = false;
+
+	for (int i = 0; i < N_ROWS && !(white_king && black_king); i++){
+		for (int j = 0; j < N_COLS && !(white_king && black_king); j++){
+			if (tree_.q_board.board_matrix(i, j) == w_king){
+				white_king = true;
+			} else if (tree_.q_board.board_matrix(i, j) == b_king){
+				black_king = true;
+			}
+		}
+	}
+
+	if (!white_king && black_king){
+		state_ = BlackWins;
+	} else if (!black_king && white_king){
+		state_ = WhiteWins;
+	} else if (!white_king && !black_king){
+		state_ = Draw;
+	} else {
+		state_ = Playing;
+	}
 }
 
 
@@ -92,19 +119,26 @@ void Game::human_turn(){
 
 
 void Game::bot_turn(){
-
-	// auto best_move = explore_tree(tree_, 2, turn_);
 	std::cout<<"Bot is thinking..."<<std::endl;
 
-	std::vector<Tile> best_move;
-	double eval = alpha_beta(tree_, MAX_DEPTH, -1000, 1000, turn_, best_move);
-
-	if (best_move.size()==2){
-		tree_.propagate(best_move[0], best_move[1]);
-		std::cout << "Bot move: "<<best_move[0].to_string()<<" "<<best_move[1].to_string()<<std::endl;
-	}else{
+	auto movements = get_movements(tree_, turn_).first;
+	if (movements.empty()){
 		std::cout << "No move is found for " << turn_ << " pieces." << std::endl;
 		state_ = Draw;
+		
+	} else {
+
+		std::vector<Tile> best_move = get_movements(tree_, turn_).first[0];
+
+		double eval = alpha_beta(tree_, MAX_DEPTH, -1000, 1000, turn_, best_move);
+
+		if (best_move.size()==2){
+			tree_.propagate(best_move[0], best_move[1]);
+			std::cout << "Bot move: "<<best_move[0].to_string()<<" "<<best_move[1].to_string()<<std::endl;
+		}else{
+			std::cout << "No move is found for " << turn_ << " pieces." << std::endl;
+			state_ = Draw;
+		}
 	}
 	
 	turn_ = turn_ == "white" ? "black" : "white";
@@ -129,7 +163,6 @@ double Game::alpha_beta(QCTree tree, int depth, double alpha, double beta,
                 new_tree.propagate(move[0], move[1]);
 
                 double eval = alpha_beta(new_tree, depth - 1, alpha, beta, "black", best_move);
-
                 if (eval > maxEval) {
                     maxEval = eval;
                     if (depth == MAX_DEPTH) { 

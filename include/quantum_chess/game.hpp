@@ -14,8 +14,8 @@ class Game {
         int N_COLS;
         GameState state_ = Playing;
         std::string turn_ = "white";
-        std::string WHITE_PLAYER = "human";
-        std::string BLACK_PLAYER = "human";
+        std::string WHITE_PLAYER = "bot";
+        std::string BLACK_PLAYER = "bot";
 
 	    QCTree tree_;
         Interface* interface_;
@@ -25,11 +25,11 @@ class Game {
 
         Game(const std::string& config_file);
 
-        bool ALLOW_ENTANGLEMENT = true;
+        bool ALLOW_ENTANGLEMENT = false;
 
         void human_turn();
         void bot_turn();
-        std::vector<Tile> explore_tree(QCTree tree, int depth, std::string turn);
+        void check_state();
         double alpha_beta(QCTree tree, int depth, double alpha, double beta, 
                                          std::string turn, std::vector<Tile>& best_move);
         void get_movements();
