@@ -29,9 +29,11 @@ class MCTS {
         int SIMULATION_DEPTH = 50;
         int MAX_SIMULATIONS = 10000;
 
+        std::vector<Tile> best_move;
+
         MCTS() {}
 
-        std::vector<Tile> search(QCTree& tree, std::string turn) {
+        void search(QCTree& tree, std::string turn) {
             MCTSNode root(nullptr);
 
             // Compute simulations
@@ -53,16 +55,16 @@ class MCTS {
             MCTSNode* best_node = nullptr;
             double max_score = -std::numeric_limits<double>::infinity();
             for (MCTSNode* child : root.children) {
-                std::cout << "score: " << child->score << " visits: " << child->visits << std::endl;
+                // std::cout << "score: " << child->score << " visits: " << child->visits << std::endl;
                 if (child->score/(child->visits+0.1) > max_score) {
                     max_score = child->score/(child->visits+0.1);
                     best_node = child;
                 }
             }
 
-            std::cout << "max score: " << max_score << std::endl;
+            // std::cout << "max score: " << max_score << std::endl;
 
-            return best_node->move; 
+            best_move = best_node->move; 
         }
 
     private: 

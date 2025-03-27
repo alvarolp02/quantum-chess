@@ -17,6 +17,7 @@ class QCTree {
         std::shared_ptr<QCNode> root;
         int N_ROWS;
         int N_COLS;
+        bool ALLOW_ENTANGLEMENT = false;
         double score;
 
         QCTree(){
@@ -266,7 +267,7 @@ class QCTree {
         
 
         std::pair<std::vector<std::vector<Tile>>,std::vector<std::vector<Tile>>> 
-			                                get_movements(std::string turn, bool ALLOW_ENTANGLEMENT=false){
+			                                get_movements(std::string turn){
             std::vector<std::vector<Tile>> movements;
             std::vector<std::vector<Tile>> collapse_movements;
 

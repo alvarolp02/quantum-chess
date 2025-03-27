@@ -16,7 +16,7 @@ Game::Game(const std::string& config_file = ""){
 	}
 
 	interface_ = new Interface(N_ROWS, N_COLS);
-	if (WHITE_PLAYER=="bot" && BLACK_PLAYER=="bot"){
+	if (is_bot(WHITE_PLAYER) && is_bot(BLACK_PLAYER)){
 		interface_->BOT = true;
 	}
 
@@ -29,10 +29,10 @@ Game::Game(const std::string& config_file = ""){
 
 		get_movements();
 
-		if ((turn_=="white" && WHITE_PLAYER=="human") || (turn_=="black" && BLACK_PLAYER=="human")){
-			human_turn();
-		} else if ((turn_=="white" && WHITE_PLAYER=="bot") || (turn_=="black" && BLACK_PLAYER=="bot")){
+		if (is_bot(current_player())){
 			bot_turn();
+		} else {
+			human_turn();
 		}
 		
 	}
@@ -105,18 +105,33 @@ void Game::bot_turn(){
 
 		std::vector<Tile> best_move = movements_[0];
 
-		// double eval = alpha_beta(tree_, MAX_DEPTH, -1000, 1000, turn_, best_move);
+		switch (current_player())
+		{
+			case Bot_AlphaBeta: {
+				AlphaBeta ab;
+				ab.MAX_DEPTH = 5;
+				ab.search(tree_, turn_);
+				best_move = ab.best_move;
+				break;
+			}
+			case Bot_MCTS: {
+				MCTS mcts;
+				mcts.EXPLORATION_CONSTANT = 1.2;
+				mcts.SIMULATION_DEPTH = 30;
+				mcts.MAX_SIMULATIONS = 3000;
+				mcts.search(tree_, turn_);
+				best_move = mcts.best_move;
+				break;
+			}
+			default: {
+				std::cout << "Unknown bot" << std::endl;
+				break;
+			}
+		}
 
-		MCTS mcts;
-		mcts.EXPLORATION_CONSTANT = 1.2;
-		mcts.SIMULATION_DEPTH = 30;
-		mcts.MAX_SIMULATIONS = 3000;
-		best_move =  mcts.search(tree_, turn_);
-		// std::cout << "Monte Carlo best move: " << mc_best[0].to_string() << " " << mc_best[1].to_string() << std::endl;
-		// best_move = mc_best;
 		if (best_move.size()==2){
 			tree_.propagate(best_move[0], best_move[1]);
-			std::cout << "Bot move: "<<best_move[0].to_string()<<" "<<best_move[1].to_string()<<std::endl;
+			std::cout << turn_ << " bot move: "<<best_move[0].to_string()<<" "<<best_move[1].to_string()<<std::endl;
 			state_ = tree_.state;
 		}else{
 			std::cout << "No move is found for " << turn_ << " pieces." << std::endl;
@@ -129,64 +144,6 @@ void Game::bot_turn(){
 	print_interface();
 }
 
-
-
-double Game::alpha_beta(QCTree tree, int depth, double alpha, double beta, 
-                         std::string turn, std::vector<Tile>& best_move) {
-    if (depth == 0) {
-        return tree.score; 
-    }
-
-    if (turn == "white") { // Maximizing player
-        double maxEval = -1000;
-
-        for (auto move : tree.get_movements(turn).first) {
-            if (move.size() == 2) {
-                QCTree new_tree = tree;
-                new_tree.propagate(move[0], move[1]);
-
-                double eval = alpha_beta(new_tree, depth - 1, alpha, beta, "black", best_move);
-                if (eval > maxEval) {
-                    maxEval = eval;
-                    if (depth == MAX_DEPTH) { 
-                        best_move = move;
-                    }
-                }
-
-                alpha = std::max(alpha, eval);
-                if (beta <= alpha) {
-                    break; // beta pruning
-                }
-            }
-        }
-        return maxEval;
-
-    } else { // Minimizing player
-        double minEval = 1000;
-
-        for (auto move : tree.get_movements(turn).first) {
-            if (move.size() == 2) {
-                QCTree new_tree = tree;
-                new_tree.propagate(move[0], move[1]);
-
-                double eval = alpha_beta(new_tree, depth - 1, alpha, beta, "white", best_move);
-
-                if (eval < minEval) {
-                    minEval = eval;
-                    if (depth == MAX_DEPTH) {
-                        best_move = move;
-                    }
-                }
-
-                beta = std::min(beta, eval);
-                if (beta <= alpha) {
-                    break; // alpha pruning
-                }
-            }
-        }
-        return minEval;
-    }
-}
 
 
 void Game::get_movements(){
