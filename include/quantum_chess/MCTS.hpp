@@ -13,6 +13,10 @@ int N_ROWS = 6;
 int N_COLS = 6;
 bool ALLOW_ENTANGLEMENT = false;
 
+// Parámetros configurables
+#define EXPLORATION_CONSTANT 1.2
+#define SIMULATION_DEPTH 5
+
 class MCTSNode {
 public:
     MCTSNode* parent;
@@ -115,12 +119,15 @@ GameState check_state(QCTree& tree) {
 
 // Función de simulación aleatoria
 double random_simulation(QCTree& tree, std::string turn) {
-    int depth = 0;
+    int moves_played = 0;
     std::string initial_turn = turn;
-    while (check_state(tree) == Playing) {
+    while (check_state(tree) == Playing && moves_played < SIMULATION_DEPTH) {
     // while (!tree.is_terminal()) {
         // Genera un movimiento aleatorio
         auto movements = get_movements(tree, turn);
+        if (movements.first.empty()) {
+            break;
+        }
         auto random_move = movements.first[rand() % movements.first.size()];
         
         // Aplica el movimiento a la nueva posición
@@ -128,10 +135,23 @@ double random_simulation(QCTree& tree, std::string turn) {
         
         // Cambia de turno
         turn = (turn == "white") ? "black" : "white";
-        depth++;
+        moves_played++;
     }
-    double final_score = tree.score;
-    return (initial_turn == "white") ? final_score : -final_score; // Devuelve la puntuación final del estado del juego
+
+
+    double final_score = 0.0;
+    auto state = check_state(tree);
+    if (state == WhiteWins && initial_turn == "white" || state == BlackWins && initial_turn == "black") {
+        final_score = 1.0;
+    } else if (state == BlackWins && initial_turn == "white" || state == WhiteWins && initial_turn == "black") {
+        final_score = - 1.0;
+    } else if (state == Draw){
+        final_score = 0.5;
+    } else {
+        final_score = (initial_turn == "white") ? tree.score/100 : -tree.score/100;
+    }
+    return final_score; // Devuelve la puntuación final del estado del juego
+
 }
 
 // Selección y expansión de los nodos
@@ -143,7 +163,7 @@ MCTSNode* select_and_expand(MCTSNode* node, QCTree& tree, std::string turn) {
         
         for (MCTSNode* child : node->children) {
             // Cálculo de UCT para cada hijo
-            double uct = child->score / (child->visits + 1) + sqrt(2 * log(node->visits + 1) / (child->visits + 1));
+            double uct = (child->score/(child->visits+0.000001)) + EXPLORATION_CONSTANT * sqrt(2 * log(node->visits + 0.0000000001) / (child->visits + 0.00000001));
             if (uct > best_uct) {
                 best_uct = uct;
                 best_node = child;
@@ -155,12 +175,14 @@ MCTSNode* select_and_expand(MCTSNode* node, QCTree& tree, std::string turn) {
         // Si el nodo no tiene hijos, lo expandimos
         auto movements = get_movements(tree, turn).first;
         for (const auto& move : movements) {
-            QCTree new_tree = tree;
-            new_tree.propagate(move[0], move[1]);
+            if (move.size() == 2) {
+                QCTree new_tree = tree;
+                new_tree.propagate(move[0], move[1]);
 
-            MCTSNode* child_node = new MCTSNode(node);
-            child_node->move = move;
-            node->addChild(child_node);
+                MCTSNode* child_node = new MCTSNode(node);
+                child_node->move = move;
+                node->addChild(child_node);
+            }
         }
 
         return node; // Ahora tenemos los nodos hijos, podemos seleccionar uno y continuar
@@ -197,14 +219,24 @@ std::vector<Tile> monte_carlo_tree_search(QCTree& tree, std::string turn, int ma
 
     // Elegir el mejor movimiento basado en el nodo más visitado
     MCTSNode* best_node = nullptr;
-    int max_visits = -1;
-    
+    double max_score = -std::numeric_limits<double>::infinity();
     for (MCTSNode* child : root.children) {
-        if (child->visits > max_visits) {
-            max_visits = child->visits;
+        std::cout << "score: " << child->score << " visits: " << child->visits << std::endl;
+        if (child->score/(child->visits+0.1) > max_score) {
+            max_score = child->score/(child->visits+0.1);
             best_node = child;
         }
     }
+    
+    // for (MCTSNode* child : root.children) {
+    //     if (child->visits > max_visits) {
+    //         max_visits = child->visits;
+    //         best_node = child;
+    //     }
+    // }
+
+    std::cout << "max score: " << max_score << std::endl;
+    std::cout << "hijos: " <<  root.children.size() << std::endl;
 
     return best_node->move; // Retorna el mejor movimiento según las simulaciones
 }

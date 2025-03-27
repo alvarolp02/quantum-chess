@@ -6,8 +6,8 @@ int MAX_DEPTH = 5;
 Game::Game(const std::string& config_file = ""){
 	N_ROWS=8;
 	N_COLS=8;
-	if (config_file != ""){
-		Eigen::MatrixXi board_matrix = load_config(config_file);
+	if (config_file != "" || true){
+		Eigen::MatrixXi board_matrix = load_config("../config/6x6.yaml");
 		tree_ = QCTree(board_matrix);
 		N_ROWS = board_matrix.rows();
 		N_COLS = board_matrix.cols();
@@ -132,7 +132,7 @@ void Game::bot_turn(){
 
 		// double eval = alpha_beta(tree_, MAX_DEPTH, -1000, 1000, turn_, best_move);
 
-		best_move =  monte_carlo_tree_search(tree_, turn_, 3000);
+		best_move =  monte_carlo_tree_search(tree_, turn_, 10000);
 		// std::cout << "Monte Carlo best move: " << mc_best[0].to_string() << " " << mc_best[1].to_string() << std::endl;
 		// best_move = mc_best;
 		if (best_move.size()==2){
