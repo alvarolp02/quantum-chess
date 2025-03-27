@@ -3,6 +3,7 @@
 #include "quantum_chess/board.hpp"
 #include "quantum_chess/qc_node.hpp"
 #include "quantum_chess/utils.hpp"
+#include "quantum_chess/MCTS.hpp"
 #include <thread>
 #include <random>
 #include <filesystem>

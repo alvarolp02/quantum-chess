@@ -130,8 +130,11 @@ void Game::bot_turn(){
 
 		std::vector<Tile> best_move = get_movements(tree_, turn_).first[0];
 
-		double eval = alpha_beta(tree_, MAX_DEPTH, -1000, 1000, turn_, best_move);
+		// double eval = alpha_beta(tree_, MAX_DEPTH, -1000, 1000, turn_, best_move);
 
+		best_move =  monte_carlo_tree_search(tree_, turn_, 3000);
+		// std::cout << "Monte Carlo best move: " << mc_best[0].to_string() << " " << mc_best[1].to_string() << std::endl;
+		// best_move = mc_best;
 		if (best_move.size()==2){
 			tree_.propagate(best_move[0], best_move[1]);
 			std::cout << "Bot move: "<<best_move[0].to_string()<<" "<<best_move[1].to_string()<<std::endl;
