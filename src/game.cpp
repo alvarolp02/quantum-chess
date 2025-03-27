@@ -6,8 +6,8 @@ int MAX_DEPTH = 5;
 Game::Game(const std::string& config_file = ""){
 	N_ROWS=8;
 	N_COLS=8;
-	if (config_file != "" || true){
-		Eigen::MatrixXi board_matrix = load_config("../config/6x6.yaml");
+	if (config_file != ""){
+		Eigen::MatrixXi board_matrix = load_config(config_file);
 		tree_ = QCTree(board_matrix);
 		N_ROWS = board_matrix.rows();
 		N_COLS = board_matrix.cols();
@@ -34,8 +34,6 @@ Game::Game(const std::string& config_file = ""){
 		} else if ((turn_=="white" && WHITE_PLAYER=="bot") || (turn_=="black" && BLACK_PLAYER=="bot")){
 			bot_turn();
 		}
-
-		check_state();
 		
 	}
 
@@ -43,31 +41,6 @@ Game::Game(const std::string& config_file = ""){
 	
 	thread_0.join();
 
-}
-
-void Game::check_state(){
-	bool white_king = false;
-	bool black_king = false;
-
-	for (int i = 0; i < N_ROWS && !(white_king && black_king); i++){
-		for (int j = 0; j < N_COLS && !(white_king && black_king); j++){
-			if (tree_.q_board.board_matrix(i, j) == w_king){
-				white_king = true;
-			} else if (tree_.q_board.board_matrix(i, j) == b_king){
-				black_king = true;
-			}
-		}
-	}
-
-	if (!white_king && black_king){
-		state_ = BlackWins;
-	} else if (!black_king && white_king){
-		state_ = WhiteWins;
-	} else if (!white_king && !black_king){
-		state_ = Draw;
-	} else {
-		state_ = Playing;
-	}
 }
 
 
@@ -115,29 +88,36 @@ void Game::human_turn(){
 		}
 		print_interface(selected_moves);
 	}
+
+	state_ = tree_.state;
 }
 
 
 void Game::bot_turn(){
 	std::cout<<"Bot is thinking..."<<std::endl;
 
-	auto movements = get_movements(tree_, turn_).first;
-	if (movements.empty()){
+	get_movements();
+	if (movements_.empty()){
 		std::cout << "No move is found for " << turn_ << " pieces." << std::endl;
 		state_ = Draw;
 		
 	} else {
 
-		std::vector<Tile> best_move = get_movements(tree_, turn_).first[0];
+		std::vector<Tile> best_move = movements_[0];
 
 		// double eval = alpha_beta(tree_, MAX_DEPTH, -1000, 1000, turn_, best_move);
 
-		best_move =  monte_carlo_tree_search(tree_, turn_, 10000);
+		MCTS mcts;
+		mcts.EXPLORATION_CONSTANT = 1.2;
+		mcts.SIMULATION_DEPTH = 30;
+		mcts.MAX_SIMULATIONS = 3000;
+		best_move =  mcts.search(tree_, turn_);
 		// std::cout << "Monte Carlo best move: " << mc_best[0].to_string() << " " << mc_best[1].to_string() << std::endl;
 		// best_move = mc_best;
 		if (best_move.size()==2){
 			tree_.propagate(best_move[0], best_move[1]);
 			std::cout << "Bot move: "<<best_move[0].to_string()<<" "<<best_move[1].to_string()<<std::endl;
+			state_ = tree_.state;
 		}else{
 			std::cout << "No move is found for " << turn_ << " pieces." << std::endl;
 			state_ = Draw;
@@ -160,7 +140,7 @@ double Game::alpha_beta(QCTree tree, int depth, double alpha, double beta,
     if (turn == "white") { // Maximizing player
         double maxEval = -1000;
 
-        for (auto move : get_movements(tree, turn).first) {
+        for (auto move : tree.get_movements(turn).first) {
             if (move.size() == 2) {
                 QCTree new_tree = tree;
                 new_tree.propagate(move[0], move[1]);
@@ -184,7 +164,7 @@ double Game::alpha_beta(QCTree tree, int depth, double alpha, double beta,
     } else { // Minimizing player
         double minEval = 1000;
 
-        for (auto move : get_movements(tree, turn).first) {
+        for (auto move : tree.get_movements(turn).first) {
             if (move.size() == 2) {
                 QCTree new_tree = tree;
                 new_tree.propagate(move[0], move[1]);
@@ -210,66 +190,11 @@ double Game::alpha_beta(QCTree tree, int depth, double alpha, double beta,
 
 
 void Game::get_movements(){
-	std::pair<std::vector<std::vector<Tile>>,std::vector<std::vector<Tile>>> movements = get_movements(tree_, turn_);
+	std::pair<std::vector<std::vector<Tile>>,std::vector<std::vector<Tile>>> movements = tree_.get_movements(turn_);
 	movements_ = movements.first;
 	collapse_movements_ = movements.second;
 }
 
-
-std::pair<std::vector<std::vector<Tile>>,std::vector<std::vector<Tile>>> 
-			Game::get_movements(QCTree tree, std::string turn){
-	std::vector<std::vector<Tile>> movements;
-	std::vector<std::vector<Tile>> collapse_movements;
-
-	for (int i = 0; i < N_ROWS; i++){
-		for (int j = 0; j < N_COLS; j++){
-			Tile source = Tile(i, j);
-
-			if (turn == "white" && tree.q_board.isWhite(source) ||
-					turn == "black" && tree.q_board.isBlack(source)){
-				std::vector<Tile> validMoves = tree.q_board.getValidMoves(source);
-				
-				if (ALLOW_ENTANGLEMENT){
-					for (std::shared_ptr<Board> board : tree.get_leaf_boards()){
-						for (Tile move : board->getValidMoves(source)){
-							if (tree.q_board.board_matrix(move.row, move.col) == gap || 
-									tree.q_board.board_matrix(move.row, move.col) == board->board_matrix(source.row, source.col)){
-								validMoves.push_back(move);
-							}
-						}
-					}
-				}
-				
-
-				for (Tile target1 : validMoves){
-					// Check if the move would be a quantum capture
-					if (tree.pond_matrix(source.row, source.col) != 1.00
-						&& ((turn=="white" && tree.q_board.isBlack(target1))
-						|| (turn=="black" && tree.q_board.isWhite(target1)))){
-							
-						collapse_movements.push_back({source, target1});
-						continue;
-					} else {
-						// Get simple moves
-						movements.push_back({source, target1});
-					}
-
-					// Get split moves only to gap targets
-					if (tree.q_board.board_matrix(target1.row, target1.col) != gap){
-						continue;
-					}
-					for (Tile target2 : validMoves){
-						if (!(target1==target2) && tree.q_board.board_matrix(target2.row, target2.col) == gap){
-							movements.push_back({source, target1, target2});
-						}
-					}
-				}
-			} 
-		}
-	}
-
-	return {movements, collapse_movements};
-}
 
 
 int main(int argc, char * argv[])

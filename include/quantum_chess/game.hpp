@@ -34,8 +34,6 @@ class Game {
         double alpha_beta(QCTree tree, int depth, double alpha, double beta, 
                                          std::string turn, std::vector<Tile>& best_move);
         void get_movements();
-        std::pair<std::vector<std::vector<Tile>>,std::vector<std::vector<Tile>>> 
-                get_movements(QCTree tree, std::string turn);
 
         void print_interface(){
             interface_->loadBoard();
