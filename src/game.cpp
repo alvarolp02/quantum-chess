@@ -111,6 +111,7 @@ void Game::bot_turn(){
 			case Bot_AlphaBeta: {
 				AlphaBeta ab;
 				ab.MAX_DEPTH = 5;
+				ab.ALLOW_QUANTUM = true;
 				ab.search(tree_, turn_);
 				best_move = ab.best_move;
 				break;

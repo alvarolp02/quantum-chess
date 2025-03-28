@@ -6,6 +6,7 @@
 class AlphaBeta {
     public:
         int MAX_DEPTH = 5;
+        bool ALLOW_QUANTUM = true;
         double SPLIT_BONUS = 0.01;
         double COLLAPSE_BONUS = 0.1;
 
@@ -29,6 +30,8 @@ class AlphaBeta {
                 std::vector<std::vector<Tile>> collapse_movements = M.second;
 
                 for (auto move : movements) {
+                    if (!ALLOW_QUANTUM && move.size() != 2) continue;
+
                     QCTree new_tree = tree;
                     new_tree.propagate(move[0], move[1]);
 
@@ -49,31 +52,35 @@ class AlphaBeta {
                         break; // beta pruning
                     }
                 }
-                // Collapse moves
-                for (auto move : collapse_movements) {
-                    QCTree new_tree = tree;
-                    new_tree.propagate(move[0], move[1]);
-                    new_tree.collapse(move[0]);
-                    // If the piece is real, capture the target
-                    if(new_tree.q_board.board_matrix(move[0].row, move[0].col) != 0.0){
+
+                if (ALLOW_QUANTUM) {
+                    // Collapse moves
+                    for (auto move : collapse_movements) {
+                        QCTree new_tree = tree;
                         new_tree.propagate(move[0], move[1]);
-                    }
+                        new_tree.collapse(move[0]);
+                        // If the piece is real, capture the target
+                        if(new_tree.q_board.board_matrix(move[0].row, move[0].col) != 0.0){
+                            new_tree.propagate(move[0], move[1]);
+                        }
 
-                    double eval = search_aux(new_tree, depth - 1, alpha, beta, "black");
-                    eval += COLLAPSE_BONUS;
+                        double eval = search_aux(new_tree, depth - 1, alpha, beta, "black");
+                        eval += COLLAPSE_BONUS;
 
-                    if (eval > maxEval) {
-                        maxEval = eval;
-                        if (depth == MAX_DEPTH) {
-                            this->best_move = move;
+                        if (eval > maxEval) {
+                            maxEval = eval;
+                            if (depth == MAX_DEPTH) {
+                                this->best_move = move;
+                            }
+                        }
+
+                        alpha = std::max(alpha, eval);
+                        if (beta <= alpha) {
+                            break; // beta pruning
                         }
                     }
-
-                    alpha = std::max(alpha, eval);
-                    if (beta <= alpha) {
-                        break; // beta pruning
-                    }
                 }
+                
                 return maxEval;
 
             } else { // Minimizing player
@@ -83,6 +90,7 @@ class AlphaBeta {
                 std::vector<std::vector<Tile>> collapse_movements = M.second;
 
                 for (auto move : movements) {
+                    if (!ALLOW_QUANTUM && move.size() != 2) continue;
                     QCTree new_tree = tree;
                     new_tree.propagate(move[0], move[1]);
 
@@ -90,7 +98,7 @@ class AlphaBeta {
                     if (move.size() == 3) {
                         eval -= SPLIT_BONUS;
                     }
-                    
+
                     if (eval < minEval) {
                         minEval = eval;
                         if (depth == MAX_DEPTH) {
@@ -103,31 +111,35 @@ class AlphaBeta {
                         break; // alpha pruning
                     }
                 }
+
                 // Collapse moves
-                for (auto move : collapse_movements) {
-                    QCTree new_tree = tree;
-                    new_tree.propagate(move[0], move[1]);
-                    new_tree.collapse(move[0]);
-                    // If the piece is real, capture the target
-                    if(new_tree.q_board.board_matrix(move[0].row, move[0].col) != 0.0){
+                if (ALLOW_QUANTUM){
+                    for (auto move : collapse_movements) {
+                        QCTree new_tree = tree;
                         new_tree.propagate(move[0], move[1]);
-                    }
-
-                    double eval = search_aux(new_tree, depth - 1, alpha, beta, "white");
-                    eval -= COLLAPSE_BONUS;
-
-                    if (eval < minEval) {
-                        minEval = eval;
-                        if (depth == MAX_DEPTH) {
-                            this->best_move = move;
+                        new_tree.collapse(move[0]);
+                        // If the piece is real, capture the target
+                        if(new_tree.q_board.board_matrix(move[0].row, move[0].col) != 0.0){
+                            new_tree.propagate(move[0], move[1]);
+                        }
+    
+                        double eval = search_aux(new_tree, depth - 1, alpha, beta, "white");
+                        eval -= COLLAPSE_BONUS;
+    
+                        if (eval < minEval) {
+                            minEval = eval;
+                            if (depth == MAX_DEPTH) {
+                                this->best_move = move;
+                            }
+                        }
+    
+                        beta = std::min(beta, eval);
+                        if (beta <= alpha) {
+                            break; // alpha pruning
                         }
                     }
-
-                    beta = std::min(beta, eval);
-                    if (beta <= alpha) {
-                        break; // alpha pruning
-                    }
                 }
+                
                 return minEval;
             }
         }
