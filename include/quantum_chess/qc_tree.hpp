@@ -12,10 +12,12 @@ class QCTree {
         Eigen::MatrixXd pond_matrix;
         Board q_board;
         int depth;
+        GameState state;
         std::vector<std::shared_ptr<Split>> splits;
         std::shared_ptr<QCNode> root;
         int N_ROWS;
         int N_COLS;
+        bool ALLOW_ENTANGLEMENT = false;
         double score;
 
         QCTree(){
@@ -24,6 +26,7 @@ class QCTree {
             score = 0.0;
             this->q_board = Board(Eigen::MatrixXi::Zero(N_ROWS, N_COLS));
             this->depth = 0;
+            this->state = Playing;
             this->root = std::make_shared<QCNode>(std::make_shared<Board>(), 0);
 
             std::srand(std::time(nullptr)); // use current time as seed for random generator
@@ -33,7 +36,7 @@ class QCTree {
 
         // Deep copy constructor
         QCTree(const QCTree& other): pond_matrix(other.pond_matrix), q_board(other.q_board), depth(other.depth),
-                            N_ROWS(other.N_ROWS), N_COLS(other.N_COLS), score(other.score), root(nullptr) {
+                N_ROWS(other.N_ROWS), N_COLS(other.N_COLS), score(other.score), state(other.state), root(nullptr) {
             // Deep copy splits 
             splits.reserve(other.splits.size());
             for (auto s : other.splits) {
@@ -58,6 +61,7 @@ class QCTree {
             N_ROWS = other.N_ROWS;
             N_COLS = other.N_COLS;
             score = other.score;
+            state = other.state;
 
             // Deep copy splits
             splits.reserve(other.splits.size());
@@ -175,6 +179,7 @@ class QCTree {
 
             this->get_ponderated_board();
             this->compute_tree_score();
+            this->check_state();
         }
         
         void split(Tile source, Tile target1, Tile target2){
@@ -205,6 +210,7 @@ class QCTree {
             this->depth++;
             this->get_ponderated_board();
             this->compute_tree_score();
+            this->check_state();
         }
         
         void collapse(Tile piece){
@@ -246,6 +252,7 @@ class QCTree {
 
             this->get_ponderated_board();
             this->compute_tree_score();
+            this->check_state();
         }
 
 
@@ -258,6 +265,88 @@ class QCTree {
             return leaf_boards;
         }
         
+
+        std::pair<std::vector<std::vector<Tile>>,std::vector<std::vector<Tile>>> 
+			                                get_movements(std::string turn){
+            std::vector<std::vector<Tile>> movements;
+            std::vector<std::vector<Tile>> collapse_movements;
+
+            for (int i = 0; i < N_ROWS; i++){
+                for (int j = 0; j < N_COLS; j++){
+                    Tile source = Tile(i, j);
+
+                    if (turn == "white" && this->q_board.isWhite(source) ||
+                            turn == "black" && this->q_board.isBlack(source)){
+                        std::vector<Tile> validMoves = this->q_board.getValidMoves(source);
+                        
+                        if (ALLOW_ENTANGLEMENT){
+                            for (std::shared_ptr<Board> board : this->get_leaf_boards()){
+                                for (Tile move : board->getValidMoves(source)){
+                                    if (this->q_board.board_matrix(move.row, move.col) == gap || 
+                                        this->q_board.board_matrix(move.row, move.col) == board->board_matrix(source.row, source.col)){
+                                        validMoves.push_back(move);
+                                    }
+                                }
+                            }
+                        }
+                        
+
+                        for (Tile target1 : validMoves){
+                            // Check if the move would be a quantum capture
+                            if (this->pond_matrix(source.row, source.col) != 1.00
+                                && ((turn=="white" && this->q_board.isBlack(target1))
+                                || (turn=="black" && this->q_board.isWhite(target1)))){
+                                    
+                                collapse_movements.push_back({source, target1});
+                                continue;
+                            } else {
+                                // Get simple moves
+                                movements.push_back({source, target1});
+                            }
+
+                            // Get split moves only to gap targets
+                            if (this->q_board.board_matrix(target1.row, target1.col) != gap){
+                                continue;
+                            }
+                            for (Tile target2 : validMoves){
+                                if (!(target1==target2) && this->q_board.board_matrix(target2.row, target2.col) == gap){
+                                    movements.push_back({source, target1, target2});
+                                }
+                            }
+                        }
+                    } 
+                }
+            }
+
+            return {movements, collapse_movements};
+        }
+
+
+        void check_state(){
+            bool white_king = false;
+            bool black_king = false;
+        
+            for (int i = 0; i < N_ROWS && !(white_king && black_king); i++){
+                for (int j = 0; j < N_COLS && !(white_king && black_king); j++){
+                    if (this->q_board.board_matrix(i, j) == w_king){
+                        white_king = true;
+                    } else if (this->q_board.board_matrix(i, j) == b_king){
+                        black_king = true;
+                    }
+                }
+            }
+        
+            if (!white_king && black_king){
+                this->state = BlackWins;
+            } else if (!black_king && white_king){
+                this->state = WhiteWins;
+            } else if (!white_king && !black_king){
+                this->state = Draw;
+            } else {
+                this->state = Playing;
+            }
+        }
+
 
         void print_tree(){
             print_tree_aux(this->root, "");
@@ -355,7 +444,7 @@ class QCTree {
                     sum += this->q_board.get_score(i,j) * this->pond_matrix(i, j);
                 }
             }
-            this->score = sum;
+            this->score = sum/100;
         } 
 
 

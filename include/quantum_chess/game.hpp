@@ -3,6 +3,8 @@
 #include "quantum_chess/board.hpp"
 #include "quantum_chess/qc_node.hpp"
 #include "quantum_chess/utils.hpp"
+#include "quantum_chess/MCTS.hpp"
+#include "quantum_chess/alpha_beta.hpp"
 #include <thread>
 #include <random>
 #include <filesystem>
@@ -14,8 +16,8 @@ class Game {
         int N_COLS;
         GameState state_ = Playing;
         std::string turn_ = "white";
-        std::string WHITE_PLAYER = "bot";
-        std::string BLACK_PLAYER = "bot";
+        GamePlayer WHITE_PLAYER = Bot_MCTS;
+        GamePlayer BLACK_PLAYER = Bot_AlphaBeta; 
 
 	    QCTree tree_;
         Interface* interface_;
@@ -29,12 +31,11 @@ class Game {
 
         void human_turn();
         void bot_turn();
-        void check_state();
-        double alpha_beta(QCTree tree, int depth, double alpha, double beta, 
-                                         std::string turn, std::vector<Tile>& best_move);
         void get_movements();
-        std::pair<std::vector<std::vector<Tile>>,std::vector<std::vector<Tile>>> 
-                get_movements(QCTree tree, std::string turn);
+
+        GamePlayer current_player(){
+            return turn_ == "white" ? WHITE_PLAYER : BLACK_PLAYER;
+        }
 
         void print_interface(){
             interface_->loadBoard();

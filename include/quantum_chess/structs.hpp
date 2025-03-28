@@ -45,6 +45,16 @@ enum GameState {
     Draw
 };
 
+enum GamePlayer {
+    Human,
+    Bot_AlphaBeta,
+    Bot_MCTS
+};
+
+bool is_bot(GamePlayer player) {
+    return player == Bot_AlphaBeta || player == Bot_MCTS;
+}
+
 std::string string(GameState state) {
     switch (state) {
         case Playing: return "playing";
