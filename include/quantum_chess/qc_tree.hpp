@@ -17,6 +17,7 @@ class QCTree {
         std::shared_ptr<QCNode> root;
         int N_ROWS;
         int N_COLS;
+        bool DEBUG = false;
         bool ALLOW_ENTANGLEMENT = false;
         double score;
 
@@ -133,7 +134,7 @@ class QCTree {
                     double p2 = double(sum)/new_moves_result.size();
                     if (p2 > p){
                         entanglement_depths.push_back(depths[depths.size()-i-1]);
-                        std::cout << "Entanglement at depth: " << depths[depths.size()-i-1] << std::endl;
+                        if (DEBUG) std::cout << "Entanglement at depth: " << depths[depths.size()-i-1] << std::endl;
                     }
 
                     i++;
@@ -214,7 +215,7 @@ class QCTree {
         }
         
         void collapse(Tile piece){
-            std::cout << "Collapsing..." << std::endl;
+            if (DEBUG) std::cout << "Collapsing..." << std::endl;
             bool random_boolean;
             
             for (int i = 0; i < splits.size(); ++i) {
@@ -427,7 +428,7 @@ class QCTree {
                             if(q_board.board_matrix(i, j) == gap){
                                 q_board.board_matrix(i, j) = board(i, j);
                             } else if (q_board.board_matrix(i, j) != board(i, j)){
-                                std::cout << "Error: Different pieces in the same tile" << std::endl;
+                                if (DEBUG) std::cout << "Error: Different pieces in the same tile" << std::endl;
                             }
                         }
                     }
