@@ -110,7 +110,7 @@ void Game::bot_turn(){
 			case Bot_AlphaBeta: {
 				AlphaBeta ab;
 				ab.MAX_DEPTH = 5;
-				ab.ALLOW_QUANTUM = true;
+				ab.ALLOW_QUANTUM = false;
 				ab.search(tree_, turn_);
 				std::cout << "AB time: " << ab.time << std::endl;
 				std::cout << "AB iterations: " << ab.it << std::endl;
