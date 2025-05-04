@@ -41,10 +41,13 @@ class AlphaBeta {
 
             for (int i = 0; i < all_movements.size(); ++i) {
                 const auto& move = all_movements[i];
-                if (!ALLOW_QUANTUM && move.size() != 2) continue;
+                bool is_split = (move.size() == 3);
+                bool is_collapse = (i > movements.size() - 1);
+
+                if (!ALLOW_QUANTUM && is_split) continue;
 
                 QCTree new_tree = tree;
-                if (i > movements.size() - 1) { // Collapse move
+                if (is_collapse) { // Collapse move
                     new_tree.propagate(move[0], move[1]);
                     new_tree.collapse(move[0]);
                     // If the piece is real, capture the target
@@ -57,44 +60,37 @@ class AlphaBeta {
                 
                 std::string next_turn = turn == "white" ? "black" : "white";
                 double eval = search_aux(new_tree, depth - 1, alpha, beta, next_turn);
-                if (move.size() == 3) {
-                    if (turn == "white") {
-                        eval += SPLIT_BONUS;
-                    } else {
-                        eval -= SPLIT_BONUS;
-                    }
+                
+                if (is_split && turn == "white") {
+                    eval += SPLIT_BONUS;
+                } else if (is_split && turn == "black") {
+                    eval -= SPLIT_BONUS;
+                } else if (is_collapse && turn == "white") {
+                    eval += COLLAPSE_BONUS;
+                } else if (is_collapse && turn == "black") {
+                    eval -= COLLAPSE_BONUS;
                 }
 
                 if (turn == "white") { // Maximizing player
                     if (eval > bestEval) {
                         bestEval = eval;
-                        if (depth == MAX_DEPTH) { 
-                            this->best_move = move;
-                        }
+                        if (depth == MAX_DEPTH) this->best_move = move;
                     }
+
+                    alpha = std::max(alpha, eval);
+                    if (beta <= alpha) break; // beta pruning
+
                 } else { // Minimizing player
                     if (eval < bestEval) {
                         bestEval = eval;
-                        if (depth == MAX_DEPTH) { 
-                            this->best_move = move;
-                        }
+                        if (depth == MAX_DEPTH) this->best_move = move;
                     }
-                }
 
-                if (turn == "white") {
-                    alpha = std::max(alpha, eval);
-                    if (beta <= alpha) {
-                        break; // beta pruning
-                    }
-                } else { // Minimizing player
                     beta = std::min(beta, eval);
-                    if (beta <= alpha) {
-                        break; // alpha pruning
-                    }
-                }
-            
-            }
+                    if (beta <= alpha) break; // alpha pruning
 
+                }
+            }
                 
             return bestEval;
         }
