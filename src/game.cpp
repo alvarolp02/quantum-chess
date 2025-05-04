@@ -103,7 +103,6 @@ void Game::bot_turn(){
 		state_ = Draw;
 		
 	} else {
-
 		std::vector<Tile> best_move = movements_[0];
 
 		switch (current_player())
@@ -111,8 +110,11 @@ void Game::bot_turn(){
 			case Bot_AlphaBeta: {
 				AlphaBeta ab;
 				ab.MAX_DEPTH = 5;
-				ab.ALLOW_QUANTUM = true;
+				ab.ALLOW_QUANTUM = false;
 				ab.search(tree_, turn_);
+				std::cout << "AB time: " << ab.time << std::endl;
+				std::cout << "AB iterations: " << ab.it << std::endl;
+				std::cout << "AB time per iteration: " << ab.time/ab.it << std::endl;
 				best_move = ab.best_move;
 				break;
 			}
