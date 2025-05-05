@@ -16,7 +16,7 @@ class Game {
         int N_COLS;
         GameState state_ = Playing;
         std::string turn_ = "white";
-        GamePlayer WHITE_PLAYER = Bot_MCTS;
+        GamePlayer WHITE_PLAYER = Bot_AlphaBeta;
         GamePlayer BLACK_PLAYER = Bot_AlphaBeta; 
 
 	    QCTree tree_;

@@ -14,6 +14,7 @@ Game::Game(const std::string& config_file = ""){
 	} else {
 		tree_ = QCTree();
 	}
+	tree_.DEBUG = true;
 
 	interface_ = new Interface(N_ROWS, N_COLS);
 	if (is_bot(WHITE_PLAYER) && is_bot(BLACK_PLAYER)){
@@ -102,7 +103,6 @@ void Game::bot_turn(){
 		state_ = Draw;
 		
 	} else {
-
 		std::vector<Tile> best_move = movements_[0];
 
 		switch (current_player())
@@ -110,7 +110,11 @@ void Game::bot_turn(){
 			case Bot_AlphaBeta: {
 				AlphaBeta ab;
 				ab.MAX_DEPTH = 5;
+				ab.ALLOW_QUANTUM = false;
 				ab.search(tree_, turn_);
+				std::cout << "AB time: " << ab.time << std::endl;
+				std::cout << "AB iterations: " << ab.it << std::endl;
+				std::cout << "AB time per iteration: " << ab.time/ab.it << std::endl;
 				best_move = ab.best_move;
 				break;
 			}
@@ -129,11 +133,23 @@ void Game::bot_turn(){
 			}
 		}
 
-		if (best_move.size()==2){
+		if (best_move.size()==2 && contains(movements_, best_move)) {
 			tree_.propagate(best_move[0], best_move[1]);
 			std::cout << turn_ << " bot move: "<<best_move[0].to_string()<<" "<<best_move[1].to_string()<<std::endl;
 			state_ = tree_.state;
-		}else{
+		} else if (best_move.size()==3 && contains(movements_, best_move)) {
+			tree_.split(best_move[0], best_move[1], best_move[2]);
+			std::cout << turn_ << " bot move: "<<best_move[0].to_string()<<" "<<best_move[1].to_string()<<" "<<best_move[2].to_string()<<std::endl;
+			state_ = tree_.state;
+		} else if (contains(collapse_movements_, best_move)) {
+			tree_.collapse(best_move[0]);
+			// If the piece is real, capture the target
+			if(tree_.q_board.board_matrix(best_move[0].row, best_move[0].col) != 0.0) {
+				tree_.propagate(best_move[0], best_move[1]);
+			}
+			std::cout << turn_ << " bot move: "<<best_move[0].to_string()<<" "<<best_move[1].to_string()<<std::endl;
+			state_ = tree_.state;
+		} else {
 			std::cout << "No move is found for " << turn_ << " pieces." << std::endl;
 			state_ = Draw;
 		}
