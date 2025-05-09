@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include "structs.hpp"
 #include "utils.hpp"
+#include "PSQT.hpp"
 #include <map>
 
 #define gap 0
@@ -27,6 +28,8 @@ class Board {
         Eigen::MatrixXi board_matrix;
         int N_ROWS;
         int N_COLS;
+        bool PESTO = false;
+
         std::map<int, double> piece_values = {
             {w_pawn, 1.0},
             {w_rook, 5.0},
@@ -42,6 +45,41 @@ class Board {
             {b_king, -100.0}
         };
 
+        std::map<int, double> pesto_mid_piece_values = {
+            {w_pawn, 82.0},
+            {w_rook, 477.0},
+            {w_knight, 337.0},
+            {w_bishop, 365.0},
+            {w_queen, 1025.0},
+            {w_king, 10000.0},
+            {b_pawn, -82.0},
+            {b_rook, -477.0},
+            {b_knight, -337.0},
+            {b_bishop, -365.0},
+            {b_queen, -1025.0},
+            {b_king, -10000.0}
+        };
+
+        std::map<int, double> pesto_end_piece_values = {
+            {w_pawn, 94.0},
+            {w_rook, 512.0},
+            {w_knight, 281.0},
+            {w_bishop, 297.0},
+            {w_queen, 936.0},
+            {w_king, 10000.0},
+            {b_pawn, -94.0},
+            {b_rook, -512.0},
+            {b_knight, -281.0},
+            {b_bishop, -297.0},
+            {b_queen, -936.0},
+            {b_king, -10000.0}
+        };
+
+
+        std::map<int, Eigen::MatrixXi> mid_PSQT;
+        
+        std::map<int, Eigen::MatrixXi> end_PSQT;
+
         Board() {
             // Initialize the board to be gap
             N_ROWS = 8;
@@ -55,6 +93,8 @@ class Board {
                             gap,    gap,    gap,    gap,    gap,    gap,    gap,    gap,
                             w_pawn, w_pawn, w_pawn, w_pawn, w_pawn, w_pawn, w_pawn, w_pawn,
                             w_rook,w_knight,w_bishop,w_queen,w_king,w_bishop,w_knight,w_rook;
+            PESTO = true;
+            mid_PSQT = PSQT::get_mid_PSQT(N_ROWS, N_COLS);
         }
 
         Board(Eigen::MatrixXi matrix) {
@@ -95,7 +135,21 @@ class Board {
         }
 
         double get_score(int row, int col){
-            return piece_values[board_matrix(row, col)];
+            double score;
+
+            int piece = board_matrix(row, col);
+            if (piece == gap) return 0.0;
+
+            if (PESTO) {
+                double mid_score = pesto_mid_piece_values[piece]
+                        + mid_PSQT[piece](row,col);
+                // // double end_score = pesto_end_piece_values[piece] + 
+                // //                     end_PSQT[piece](row,col);
+                score = mid_score;
+            } else {
+                score = piece_values[board_matrix(row, col)];
+            }
+            return score;
         }
         
         void printBoard() {
@@ -116,6 +170,13 @@ class Board {
 
         bool isBlack(int row, int col) {
             return board_matrix(row, col) >= 7;
+        }
+
+        int other(int piece) {
+            if (piece == gap) return gap;
+            if (piece <= w_king) return piece + 6;
+            if (piece >= b_pawn) return piece - 6;
+            return piece;
         }
         
         std::vector<Tile> getValidMoves(int row, int col) {

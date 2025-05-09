@@ -89,6 +89,7 @@ class QCTree {
             N_COLS = matrix.cols();
             this->q_board = Board(Eigen::MatrixXi::Zero(N_ROWS, N_COLS));
             this->depth = 0;
+            this->state = Playing;
             this->root = std::make_shared<QCNode>(std::make_shared<Board>(matrix), 0);
 
             std::srand(std::time(nullptr)); // use current time as seed for random generator
