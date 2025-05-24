@@ -1,4 +1,4 @@
-# quantum-chess
+# Quantum Chess
 
 Quantum Chess is a variation of the traditional chess where a piece can be in different tiles at the same time, showing quantum phenomena such as superposition and entanglement. This is a quantum chess implementation completely from scratch based on superposition of states in a binary tree structure.
 
