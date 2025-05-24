@@ -16,8 +16,8 @@ class Game {
         int N_COLS;
         GameState state_ = Playing;
         std::string turn_ = "white";
-        GamePlayer WHITE_PLAYER = Bot_AlphaBeta;
-        GamePlayer BLACK_PLAYER = Bot_AlphaBeta; 
+        GamePlayer WHITE_PLAYER = Human;
+        GamePlayer BLACK_PLAYER = Human; 
 
 	    QCTree tree_;
         Interface* interface_;
@@ -25,9 +25,9 @@ class Game {
 	    std::vector<std::vector<Tile>> movements_;
 	    std::vector<std::vector<Tile>> collapse_movements_;
 
-        Game(const std::string& config_file);
+        Game(int argc, char * argv[]);
 
-        bool ALLOW_ENTANGLEMENT = false;
+        bool DEBUG = false;
 
         void human_turn();
         void bot_turn();

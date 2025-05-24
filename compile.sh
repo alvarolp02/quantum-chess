@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-packages=("cmake" "libsfml-dev" "libyaml-cpp-dev" "libeigen3-dev" "libomp-dev")
+packages=("cmake" "build-essential" "libsfml-dev" "libyaml-cpp-dev" "libeigen3-dev" "libomp-dev")
 
 for pkg in "${packages[@]}"; do
     if ! dpkg -s "$pkg" &> /dev/null; then

@@ -3,10 +3,20 @@
 
 int MAX_DEPTH = 5;
 
-Game::Game(const std::string& config_file = ""){
+Game::Game(int argc, char * argv[]){
 	N_ROWS=8;
 	N_COLS=8;
-	if (config_file != ""){
+
+
+	if (argc >= 3 && argv[2] == std::string("human")) WHITE_PLAYER = Human;
+	if (argc >= 3 && argv[2] == std::string("botAB")) WHITE_PLAYER = Bot_AlphaBeta;
+	if (argc >= 3 && argv[2] == std::string("botMCTS")) WHITE_PLAYER = Bot_MCTS;
+	if (argc >= 4 && argv[3] == std::string("human")) BLACK_PLAYER = Human;
+	if (argc >= 4 && argv[3] == std::string("botAB")) BLACK_PLAYER = Bot_AlphaBeta;
+	if (argc >= 4 && argv[3] == std::string("botMCTS")) BLACK_PLAYER = Bot_MCTS;
+
+	if (argc>=2 && std::string("../") + argv[1] != ""){
+		std::string config_file = std::string("../") + argv[1];
 		Eigen::MatrixXi board_matrix = load_config(config_file);
 		tree_ = QCTree(board_matrix);
 		N_ROWS = board_matrix.rows();
@@ -110,19 +120,23 @@ void Game::bot_turn(){
 			case Bot_AlphaBeta: {
 				AlphaBeta ab;
 				ab.MAX_DEPTH = 5;
-				ab.ALLOW_QUANTUM = false;
+				ab.ALLOW_QUANTUM = true;
 				ab.search(tree_, turn_);
-				std::cout << "AB time: " << ab.time << std::endl;
-				std::cout << "AB iterations: " << ab.it << std::endl;
-				std::cout << "AB time per iteration: " << ab.time/ab.it << std::endl;
 				best_move = ab.best_move;
+
+				if (DEBUG) {
+					std::cout << "AB time: " << ab.time << std::endl;
+					std::cout << "AB iterations: " << ab.it << std::endl;
+					std::cout << "AB time per iteration: " << ab.time/ab.it << std::endl;
+				}
+				
 				break;
 			}
 			case Bot_MCTS: {
 				MCTS mcts;
 				mcts.EXPLORATION_CONSTANT = 1.2;
 				mcts.SIMULATION_DEPTH = 30;
-				mcts.MAX_SIMULATIONS = 3000;
+				mcts.MAX_SIMULATIONS = 10000;
 				mcts.search(tree_, turn_);
 				best_move = mcts.best_move;
 				break;
@@ -172,11 +186,8 @@ void Game::get_movements(){
 
 int main(int argc, char * argv[])
 {
-	if (argc == 2){
-		Game(std::string("../") + argv[1]);
-	} else {
-		Game();
-	}
+	
+	Game(argc, argv);
 
   	return 0;
 }

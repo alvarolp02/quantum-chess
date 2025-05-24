@@ -8,14 +8,14 @@ Interface::Interface() {
     N_COLS = 8;
     BOT = false;
 
-    window.create(sf::VideoMode(TILE_SIZE * N_COLS, TILE_SIZE * N_ROWS), "Tablero de Ajedrez");
+    window.create(sf::VideoMode(TILE_SIZE * N_COLS, TILE_SIZE * N_ROWS), "Quantum Chess");
 }
 
 Interface::Interface(int rows, int cols) {
     N_ROWS = rows;
     N_COLS = cols;
 
-    window.create(sf::VideoMode(TILE_SIZE * N_COLS, TILE_SIZE * N_ROWS), "Tablero de Ajedrez");
+    window.create(sf::VideoMode(TILE_SIZE * N_COLS, TILE_SIZE * N_ROWS), "Quantum Chess");
 }
 
 void Interface::openWindow() {

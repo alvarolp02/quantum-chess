@@ -18,7 +18,7 @@ class QCTree {
         int N_ROWS;
         int N_COLS;
         bool DEBUG = false;
-        bool ALLOW_ENTANGLEMENT = false;
+        bool ALLOW_ENTANGLEMENT = true;
         double score;
 
         QCTree(){
