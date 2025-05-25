@@ -39,3 +39,8 @@ The summary of the command is:
 ```bash
 ./run.sh <board_yaml> <white_player> <black_player>
 ```
+
+## Controls
+- To select a piece, just left click on it, and the available moves will appear with a green outline.
+- To do a standart move, left click on one of the available move.
+- To do a split move, right click on two of the available moves (cannot be capture moves).
